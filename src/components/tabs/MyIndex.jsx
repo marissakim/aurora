@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
+import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp, AlertCircle, Sparkles, RefreshCw, Video, ArrowRight } from 'lucide-react';
 import { colors, gradients, cardStyle } from '../../theme';
 import { computeAuroraScore, computeDimensions, getScoreLabel } from '../../utils/scoring';
 import { generateAnalysis } from '../../utils/aiInsights';
@@ -143,6 +143,54 @@ export default function MyIndex({ profile, onNavigate }) {
           </p>
         )}
       </Card>
+
+      {/* Start Here — Virtual Care hero */}
+      <div
+        onClick={() => onNavigate('clinics', { filter: 'Virtual Care' })}
+        style={{
+          background: gradients.tealGold,
+          borderRadius: 14,
+          padding: 20,
+          marginBottom: 24,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          boxShadow: '0 4px 16px rgba(58, 139, 139, 0.15)',
+          transition: 'transform 0.15s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        <div style={{
+          width: 48, height: 48, borderRadius: 12,
+          background: 'rgba(255,255,255,0.25)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Video size={24} color="#fff" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: '#fff',
+              background: 'rgba(255,255,255,0.25)',
+              padding: '2px 8px', borderRadius: 6,
+              textTransform: 'uppercase', letterSpacing: 0.5,
+            }}>
+              Start Here
+            </span>
+          </div>
+          <h3 style={{ fontSize: 17, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
+            Not ready for a clinic? Start with a virtual consult.
+          </h3>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.4 }}>
+            $25–$250 virtual consultations. Get answers in days, not weeks — without committing to a full clinic intake.
+          </p>
+        </div>
+        <ArrowRight size={20} color="#fff" style={{ flexShrink: 0 }} />
+      </div>
 
       {/* Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>

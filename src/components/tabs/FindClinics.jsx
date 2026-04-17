@@ -1,13 +1,19 @@
-import { useState } from 'react';
-import { Search, Star, MapPin, TrendingUp, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Star, MapPin, TrendingUp, DollarSign, ExternalLink, Video } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
 import { clinics } from '../../data/clinics';
+import { telehealthProviders } from '../../data/telehealth';
 
-const filters = ['IVF Clinics', 'Egg Donors', 'Surrogacy Agencies'];
+const filters = ['Virtual Care', 'IVF Clinics', 'Egg Donors', 'Surrogacy Agencies'];
 
-export default function FindClinics({ profile }) {
-  const [activeFilter, setActiveFilter] = useState('IVF Clinics');
+export default function FindClinics({ profile, initialFilter }) {
+  const [activeFilter, setActiveFilter] = useState(initialFilter || 'Virtual Care');
   const location = profile.location || 'SF Bay Area';
+
+  // Allow parent to change filter after mount (e.g., when navigating from My Index hero card)
+  useEffect(() => {
+    if (initialFilter) setActiveFilter(initialFilter);
+  }, [initialFilter]);
 
   return (
     <div>
@@ -32,7 +38,7 @@ export default function FindClinics({ profile }) {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         {filters.map(f => (
           <button
             key={f}
@@ -53,6 +59,103 @@ export default function FindClinics({ profile }) {
           </button>
         ))}
       </div>
+
+      {/* Virtual Care (Telehealth) */}
+      {activeFilter === 'Virtual Care' && (
+        <>
+          <div style={{
+            background: 'linear-gradient(135deg, #E0F2F1 0%, #FFF8E1 100%)',
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 16,
+            display: 'flex',
+            gap: 12,
+            alignItems: 'flex-start',
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: colors.teal,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Video size={18} color="#fff" />
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>
+                A lighter first step
+              </p>
+              <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
+                Virtual consultations typically cost $25–$250 (vs $500+ for clinic intake), can be booked in days, and help you understand your options before committing to a clinic.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+            {telehealthProviders.map(provider => (
+              <div key={provider.name} style={cardStyle}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 12, flex: 1 }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 10,
+                      background: colors.bg,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 22, flexShrink: 0,
+                    }}>
+                      {provider.icon}
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: '0 0 2px' }}>{provider.name}</h3>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: colors.teal, margin: '0 0 8px' }}>
+                        {provider.tagline}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={provider.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: gradients.tealGold,
+                      color: '#fff',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Visit Site <ExternalLink size={13} />
+                  </a>
+                </div>
+                <p style={{ fontSize: 13, color: colors.text, margin: '0 0 10px', lineHeight: 1.5 }}>
+                  {provider.description}
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                  {provider.offerings.map(o => (
+                    <span key={o} style={{
+                      fontSize: 11, fontWeight: 600,
+                      padding: '3px 10px', borderRadius: 6,
+                      background: '#E0F2F1', color: colors.teal,
+                    }}>
+                      {o}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: colors.textLight, gap: 16, flexWrap: 'wrap' }}>
+                  <span><DollarSign size={12} style={{ verticalAlign: -1 }} /> {provider.costRange}</span>
+                  <span style={{ textAlign: 'right' }}>Ideal for: {provider.idealFor}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Clinic cards */}
       {activeFilter === 'IVF Clinics' && (
@@ -100,7 +203,7 @@ export default function FindClinics({ profile }) {
         </div>
       )}
 
-      {activeFilter !== 'IVF Clinics' && (
+      {(activeFilter === 'Egg Donors' || activeFilter === 'Surrogacy Agencies') && (
         <div style={{ ...cardStyle, textAlign: 'center', padding: 40 }}>
           <p style={{ fontSize: 16, color: colors.textLight, margin: 0 }}>
             {activeFilter === 'Egg Donors' ? 'Donor database coming in V2.' : 'Surrogacy agency directory coming in V2.'}

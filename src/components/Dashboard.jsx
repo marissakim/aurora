@@ -19,13 +19,21 @@ const tabs = [
 
 export default function Dashboard({ profile }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [clinicsFilter, setClinicsFilter] = useState(null);
+
+  // Navigate to a tab, optionally with a pre-selected filter (e.g., deep-link
+  // from the My Index "Start Here" card to Find Clinics > Virtual Care)
+  const navigate = (tab, opts = {}) => {
+    setActiveTab(tab);
+    if (tab === 'clinics' && opts.filter) setClinicsFilter(opts.filter);
+  };
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'overview': return <MyIndex profile={profile} onNavigate={setActiveTab} />;
+      case 'overview': return <MyIndex profile={profile} onNavigate={navigate} />;
       case 'markers': return <Biomarkers />;
       case 'pathways': return <Pathways profile={profile} />;
-      case 'clinics': return <FindClinics profile={profile} />;
+      case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;
       case 'plan': return <MyPlan />;
       default: return null;
@@ -79,7 +87,7 @@ export default function Dashboard({ profile }) {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); setClinicsFilter(null); }}
               style={{
                 background: 'none',
                 border: 'none',
