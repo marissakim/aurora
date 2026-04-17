@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aurora-dev",
+      "runtimeExecutable": "/Users/marissakim/.local/node/bin/npx",
+      "runtimeArgs": ["vite", "--host"],
+      "port": 5173
+    }
+  ]
+}

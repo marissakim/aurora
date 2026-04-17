@@ -1,0 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Responsive landing headline */
+@media (max-width: 600px) {
+  .aurora-hero-headline {
+    font-size: 32px !important;
+  }
+  .aurora-hero-subhead {
+    font-size: 16px !important;
+  }
+}

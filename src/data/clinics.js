@@ -1,0 +1,38 @@
+export const clinics = [
+  {
+    name: 'Pacific Fertility Center',
+    location: 'San Francisco, CA',
+    rating: 4.8,
+    successRate: '62%',
+    avgCost: '$18,500',
+    specialty: 'IVF, Egg Freezing, LGBTQ+',
+    distance: '2.3 mi',
+  },
+  {
+    name: 'UCSF Center for Reproductive Health',
+    location: 'San Francisco, CA',
+    rating: 4.7,
+    successRate: '58%',
+    avgCost: '$21,000',
+    specialty: 'IVF, Recurrent Loss, Genetics',
+    distance: '4.1 mi',
+  },
+  {
+    name: 'Spring Fertility',
+    location: 'San Francisco, CA',
+    rating: 4.9,
+    successRate: '65%',
+    avgCost: '$19,200',
+    specialty: 'Egg Freezing, IVF, Mini-IVF',
+    distance: '3.7 mi',
+  },
+  {
+    name: 'Laurel Fertility Care',
+    location: 'San Francisco, CA',
+    rating: 4.6,
+    successRate: '55%',
+    avgCost: '$16,800',
+    specialty: 'IVF, IUI, Male Factor',
+    distance: '5.2 mi',
+  },
+];
