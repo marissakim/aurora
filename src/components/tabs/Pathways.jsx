@@ -1,17 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Sparkles } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
 import { pathways as pathwayData } from '../../data/pathways';
 import { computePathwayFit } from '../../utils/scoring';
+import { generateAnalysis } from '../../utils/aiInsights';
+import { sampleBiomarkers } from '../../data/biomarkers';
 import DonorIntakeModal from '../DonorIntakeModal';
 
 export default function Pathways({ profile }) {
   const [expanded, setExpanded] = useState(null);
   const [showDonorIntake, setShowDonorIntake] = useState(false);
+  const [reasoning, setReasoning] = useState({});
 
   const scored = pathwayData.map(p => ({
     ...p,
     fit: computePathwayFit(profile, p.id),
   })).sort((a, b) => b.fit - a.fit);
+
+  useEffect(() => {
+    generateAnalysis(profile, sampleBiomarkers).then(r => setReasoning(r.pathwayReasoning || {}));
+  }, [profile]);
 
   return (
     <div>
@@ -78,6 +86,29 @@ export default function Pathways({ profile }) {
                       </div>
                     ))}
                   </div>
+
+                  {reasoning[p.id] && (
+                    <div style={{
+                      background: 'linear-gradient(135deg, #FAF7FC 0%, #FDF4F5 100%)',
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 10,
+                      padding: 14,
+                      marginBottom: 20,
+                      display: 'flex',
+                      gap: 10,
+                      alignItems: 'flex-start',
+                    }}>
+                      <Sparkles size={16} color={colors.plum} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: colors.plum, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 4px' }}>
+                          Aurora Reasoning
+                        </p>
+                        <p style={{ fontSize: 13, color: colors.text, margin: 0, lineHeight: 1.5 }}>
+                          {reasoning[p.id]}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <h4 style={{ fontSize: 14, fontWeight: 700, color: colors.plum, margin: '0 0 12px' }}>Your Personalized Steps</h4>
                   <ol style={{ margin: 0, paddingLeft: 20 }}>
