@@ -72,7 +72,7 @@ export default function LandingPage({ onGetStarted }) {
           zIndex: 1,
         }}
       >
-        Fertility, understood.
+        Begin your Fertility Journey
       </p>
 
       <p
