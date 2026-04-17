@@ -20,6 +20,9 @@ const tabs = [
 export default function Dashboard({ profile }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [clinicsFilter, setClinicsFilter] = useState(null);
+  // Tracks which pathway the user has committed to. Set when they complete
+  // the donor-funded eligibility intake; personalizes My Plan accordingly.
+  const [selectedPathway, setSelectedPathway] = useState(null);
 
   // Navigate to a tab, optionally with a pre-selected filter (e.g., deep-link
   // from the My Index "Start Here" card to Find Clinics > Virtual Care)
@@ -32,10 +35,10 @@ export default function Dashboard({ profile }) {
     switch (activeTab) {
       case 'overview': return <MyIndex profile={profile} onNavigate={navigate} />;
       case 'markers': return <Biomarkers />;
-      case 'pathways': return <Pathways profile={profile} />;
+      case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;
-      case 'plan': return <MyPlan />;
+      case 'plan': return <MyPlan selectedPathway={selectedPathway} onNavigate={navigate} />;
       default: return null;
     }
   };

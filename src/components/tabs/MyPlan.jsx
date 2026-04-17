@@ -1,15 +1,28 @@
 import { useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
-import { planPhases } from '../../data/plan';
+import { getPlanForPathway } from '../../data/plan';
 
 const categoryColors = {
   Health: { bg: '#E8F5E9', color: '#2E7D32' },
   Appointment: { bg: '#F3E8FF', color: '#5B3E8A' },
   Financial: { bg: '#FFF8E1', color: '#E8A840' },
+  Legal: { bg: '#FFEBEE', color: '#C2185B' },
 };
 
-export default function MyPlan() {
+const pathwayBadges = {
+  splitFreeze: {
+    icon: '\uD83D\uDC9D',
+    label: 'Donor-Funded Egg Freezing',
+    partner: 'Cofertility',
+    partnerUrl: 'https://cofertility.com',
+  },
+};
+
+export default function MyPlan({ selectedPathway, onNavigate }) {
   const [completed, setCompleted] = useState(new Set());
+  const plan = getPlanForPathway(selectedPathway);
+  const badge = selectedPathway ? pathwayBadges[selectedPathway] : null;
 
   function toggleTask(id) {
     setCompleted(prev => {
@@ -23,11 +36,71 @@ export default function MyPlan() {
   return (
     <div>
       <h2 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: '0 0 8px' }}>My Plan</h2>
-      <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 24px' }}>
+      <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px' }}>
         Your personalized action plan based on your profile and goals.
       </p>
 
-      {planPhases.map((phase, pi) => (
+      {/* Pathway badge shown when user has committed to a specific pathway */}
+      {badge && (
+        <div style={{
+          background: gradients.roseGold,
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 24,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 10,
+            background: 'rgba(255,255,255,0.25)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            fontSize: 22,
+          }}>
+            {badge.icon}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, color: '#fff',
+              textTransform: 'uppercase', letterSpacing: 0.5,
+              margin: '0 0 2px', opacity: 0.9,
+            }}>
+              Personalized for
+            </p>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
+              {badge.label}
+            </h3>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+              Next steps are tailored for the {badge.partner} program.
+            </p>
+          </div>
+          <a
+            href={badge.partnerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.3)',
+              padding: '8px 14px',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 600,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {badge.partner} <ExternalLink size={12} />
+          </a>
+        </div>
+      )}
+
+      {plan.map((phase, pi) => (
         <div key={phase.title} style={{ display: 'flex', gap: 16, marginBottom: 32 }}>
           {/* Timeline */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 40, flexShrink: 0 }}>
@@ -39,7 +112,7 @@ export default function MyPlan() {
             }}>
               {pi + 1}
             </div>
-            {pi < planPhases.length - 1 && (
+            {pi < plan.length - 1 && (
               <div style={{ width: 2, flex: 1, background: colors.border, marginTop: 8 }} />
             )}
           </div>
@@ -92,6 +165,7 @@ export default function MyPlan() {
                       fontSize: 11, fontWeight: 600,
                       padding: '2px 8px', borderRadius: 6,
                       background: cat.bg, color: cat.color,
+                      whiteSpace: 'nowrap',
                     }}>
                       {task.category}
                     </span>

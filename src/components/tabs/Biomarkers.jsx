@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Plus } from 'lucide-react';
+import { Plus, Info, ChevronDown } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
-import { sampleBiomarkers } from '../../data/biomarkers';
+import { sampleBiomarkers, biomarkerEducation } from '../../data/biomarkers';
 import StatusBadge from '../ui/StatusBadge';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
@@ -24,12 +24,54 @@ function MiniSparkline({ data, status }) {
   );
 }
 
+function EducationSection({ edu }) {
+  if (!edu) return null;
+  const sections = [
+    { label: 'What it is', text: edu.whatItIs },
+    { label: 'What your number means', text: edu.whatNumberMeans },
+    { label: 'Why it matters for fertility', text: edu.whyItMatters },
+    { label: 'What you can do', text: edu.whatYouCanDo },
+  ];
+  return (
+    <div style={{
+      background: '#FAF7FC',
+      borderRadius: 10,
+      padding: 16,
+      marginTop: 12,
+    }}>
+      <p style={{
+        fontSize: 11, fontWeight: 700, color: colors.plum,
+        textTransform: 'uppercase', letterSpacing: 0.5,
+        margin: '0 0 4px',
+      }}>
+        {edu.fullName}
+      </p>
+      {sections.map(s => (
+        <div key={s.label} style={{ marginTop: 10 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: colors.text, margin: '0 0 3px' }}>
+            {s.label}
+          </p>
+          <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
+            {s.text}
+          </p>
+        </div>
+      ))}
+      <p style={{
+        fontSize: 11, color: colors.textLight, margin: '12px 0 0',
+        fontStyle: 'italic',
+      }}>
+        Retest cadence: {edu.testingCadence}
+      </p>
+    </div>
+  );
+}
+
 export default function Biomarkers() {
   const [expanded, setExpanded] = useState(null);
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h2 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: 0 }}>Biomarkers</h2>
         <button style={{
           background: gradients.purpleRose,
@@ -47,20 +89,30 @@ export default function Biomarkers() {
           <Plus size={16} /> Log Results
         </button>
       </div>
+      <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 20px' }}>
+        Tap any marker to see the trend chart and learn what it means.
+      </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         {sampleBiomarkers.map(marker => {
           const isExpanded = expanded === marker.name;
           const chartData = marker.trend.map((v, i) => ({ month: months[i], value: v }));
+          const edu = biomarkerEducation[marker.name];
           return (
             <div
               key={marker.name}
               onClick={() => setExpanded(isExpanded ? null : marker.name)}
               style={{ ...cardStyle, cursor: 'pointer', transition: 'box-shadow 0.2s' }}
             >
-              <p style={{ fontSize: 12, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px' }}>
-                {marker.name}
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: 0 }}>
+                  {marker.name}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: colors.textLight }}>
+                  <Info size={12} />
+                  <ChevronDown size={14} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                </div>
+              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
                 <div>
                   <span style={{ fontSize: 28, fontWeight: 800, color: colors.text }}>{marker.value}</span>
@@ -85,6 +137,7 @@ export default function Biomarkers() {
                       <Line type="monotone" dataKey="value" stroke={colors.plum} strokeWidth={2} dot={{ r: 4, fill: colors.plum }} />
                     </LineChart>
                   </ResponsiveContainer>
+                  <EducationSection edu={edu} />
                 </div>
               )}
             </div>

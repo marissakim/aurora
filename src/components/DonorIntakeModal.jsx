@@ -41,7 +41,7 @@ function isEligible(answers) {
   return goodAge && notBadHealth;
 }
 
-export default function DonorIntakeModal({ profile, onClose }) {
+export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({
     // Pre-fill age from profile if possible
@@ -58,6 +58,9 @@ export default function DonorIntakeModal({ profile, onClose }) {
     setTimeout(() => {
       if (isLast) {
         setSubmitted(true);
+        // Personalize the My Plan tab — user has expressed commitment
+        // by submitting their info to Cofertility
+        onSubmitted?.();
       } else {
         setStep(step + 1);
       }
@@ -212,6 +215,19 @@ export default function DonorIntakeModal({ profile, onClose }) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div style={{
+              background: '#F3E8FF',
+              borderRadius: 10,
+              padding: 12,
+              marginBottom: 16,
+              fontSize: 13,
+              color: colors.plum,
+              fontWeight: 500,
+              lineHeight: 1.4,
+            }}>
+              ✨ Your <strong>My Plan</strong> has been updated with the next steps for the Cofertility program.
             </div>
 
             <p style={{ fontSize: 12, color: colors.textLight, lineHeight: 1.5, margin: '0 0 20px' }}>

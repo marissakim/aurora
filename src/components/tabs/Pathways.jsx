@@ -7,7 +7,7 @@ import { generateAnalysis } from '../../utils/aiInsights';
 import { sampleBiomarkers } from '../../data/biomarkers';
 import DonorIntakeModal from '../DonorIntakeModal';
 
-export default function Pathways({ profile }) {
+export default function Pathways({ profile, onPathwaySelected }) {
   const [expanded, setExpanded] = useState(null);
   const [showDonorIntake, setShowDonorIntake] = useState(false);
   const [reasoning, setReasoning] = useState({});
@@ -159,7 +159,11 @@ export default function Pathways({ profile }) {
       </div>
 
       {showDonorIntake && (
-        <DonorIntakeModal profile={profile} onClose={() => setShowDonorIntake(false)} />
+        <DonorIntakeModal
+          profile={profile}
+          onClose={() => setShowDonorIntake(false)}
+          onSubmitted={() => onPathwaySelected?.('splitFreeze')}
+        />
       )}
     </div>
   );
