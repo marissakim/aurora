@@ -28,54 +28,64 @@ export default function LandingPage({ onGetStarted }) {
         pointerEvents: 'none',
       }} />
 
-      {/* Wordmark */}
+      {/* Brand mark — the visual anchor of the page */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
-        marginBottom: 48,
+        gap: 18,
+        marginBottom: 24,
         position: 'relative',
         zIndex: 1,
       }}>
-        <Leaf size={22} color="#E8E4DD" strokeWidth={1.5} style={{ transform: 'rotate(-15deg)' }} />
-        <span style={{
-          fontSize: 26,
-          fontFamily: fonts.serif,
-          fontWeight: 400,
-          letterSpacing: -0.5,
-          color: '#FBF9F5',
-        }}>
+        <Leaf
+          size={48}
+          color="#E8E4DD"
+          strokeWidth={1.25}
+          style={{ transform: 'rotate(-15deg)', opacity: 0.85 }}
+          className="eve-hero-leaf"
+        />
+        <h1
+          className="eve-hero-brand"
+          style={{
+            fontSize: 168,
+            fontFamily: fonts.serif,
+            fontWeight: 400,
+            letterSpacing: -4,
+            color: '#FBF9F5',
+            margin: 0,
+            lineHeight: 1,
+          }}
+        >
           Eve
-        </span>
+        </h1>
       </div>
 
-      <h1
-        className="eve-hero-headline"
+      <p
+        className="eve-hero-tagline"
         style={{
-          fontSize: 64,
+          fontSize: 26,
           fontFamily: fonts.serif,
+          fontStyle: 'italic',
           fontWeight: 400,
-          color: '#FBF9F5',
+          color: 'rgba(251, 249, 245, 0.85)',
           textAlign: 'center',
-          margin: '0 0 20px',
-          lineHeight: 1.05,
-          letterSpacing: -1.5,
-          maxWidth: 720,
+          margin: '0 0 32px',
+          letterSpacing: -0.3,
           position: 'relative',
           zIndex: 1,
         }}
       >
         Fertility, understood.
-      </h1>
+      </p>
 
       <p
         className="eve-hero-subhead"
         style={{
-          fontSize: 18,
-          color: 'rgba(251, 249, 245, 0.75)',
+          fontSize: 16,
+          color: 'rgba(251, 249, 245, 0.65)',
           textAlign: 'center',
-          maxWidth: 540,
-          margin: '0 0 48px',
+          maxWidth: 460,
+          margin: '0 0 40px',
           lineHeight: 1.6,
           position: 'relative',
           zIndex: 1,
@@ -96,7 +106,7 @@ export default function LandingPage({ onGetStarted }) {
           fontWeight: 600,
           fontFamily: fonts.family,
           cursor: 'pointer',
-          marginBottom: 56,
+          marginBottom: 48,
           display: 'inline-flex',
           alignItems: 'center',
           gap: 10,
