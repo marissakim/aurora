@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Leaf, Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
+import { Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
+import EveLogo from './ui/EveLogo';
 import MyIndex from './tabs/MyIndex';
 import Biomarkers from './tabs/Biomarkers';
 import Pathways from './tabs/Pathways';
@@ -58,7 +59,9 @@ export default function Dashboard({ profile }) {
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Leaf size={18} color={colors.sage} strokeWidth={1.5} style={{ transform: 'rotate(-15deg)' }} />
+          <div style={{ color: colors.sage, lineHeight: 0 }}>
+            <EveLogo size={22} strokeWidth={1.75} />
+          </div>
           <span style={{
             fontSize: 22,
             fontFamily: fonts.serif,

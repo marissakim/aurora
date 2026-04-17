@@ -21,9 +21,9 @@ body {
     font-size: 96px !important;
     letter-spacing: -3px !important;
   }
-  .eve-hero-leaf {
-    width: 32px !important;
-    height: 32px !important;
+  .eve-hero-leaf svg {
+    width: 44px !important;
+    height: auto !important;
   }
   .eve-hero-tagline {
     font-size: 20px !important;

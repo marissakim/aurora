@@ -1,5 +1,6 @@
-import { Leaf, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
+import EveLogo from './ui/EveLogo';
 
 const pills = ['Biomarkers', 'Your Score', 'Virtual Care', 'Treatment Paths'];
 
@@ -37,13 +38,9 @@ export default function LandingPage({ onGetStarted }) {
         position: 'relative',
         zIndex: 1,
       }}>
-        <Leaf
-          size={48}
-          color="#E8E4DD"
-          strokeWidth={1.25}
-          style={{ transform: 'rotate(-15deg)', opacity: 0.85 }}
-          className="eve-hero-leaf"
-        />
+        <div className="eve-hero-leaf" style={{ color: '#E8E4DD', opacity: 0.85, lineHeight: 0 }}>
+          <EveLogo size={72} strokeWidth={1.25} />
+        </div>
         <h1
           className="eve-hero-brand"
           style={{
