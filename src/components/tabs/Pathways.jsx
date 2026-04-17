@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { colors, cardStyle, gradients } from '../../theme';
 import { pathways as pathwayData } from '../../data/pathways';
 import { computePathwayFit } from '../../utils/scoring';
+import DonorIntakeModal from '../DonorIntakeModal';
 
 export default function Pathways({ profile }) {
   const [expanded, setExpanded] = useState(null);
+  const [showDonorIntake, setShowDonorIntake] = useState(false);
 
   const scored = pathwayData.map(p => ({
     ...p,
@@ -84,26 +86,50 @@ export default function Pathways({ profile }) {
                     ))}
                   </ol>
 
-                  <button style={{
-                    marginTop: 16,
-                    background: gradients.purpleRose,
-                    color: '#fff',
-                    border: 'none',
-                    padding: '10px 24px',
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    width: '100%',
-                  }}>
-                    Add to My Plan
-                  </button>
+                  {p.isDonorProgram ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowDonorIntake(true); }}
+                      style={{
+                        marginTop: 16,
+                        background: gradients.roseGold,
+                        color: '#fff',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: 10,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        width: '100%',
+                      }}
+                    >
+                      💝 Start Eligibility Intake (2 min)
+                    </button>
+                  ) : (
+                    <button style={{
+                      marginTop: 16,
+                      background: gradients.purpleRose,
+                      color: '#fff',
+                      border: 'none',
+                      padding: '10px 24px',
+                      borderRadius: 10,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      width: '100%',
+                    }}>
+                      Add to My Plan
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {showDonorIntake && (
+        <DonorIntakeModal profile={profile} onClose={() => setShowDonorIntake(false)} />
+      )}
     </div>
   );
 }

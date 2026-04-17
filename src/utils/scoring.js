@@ -46,13 +46,21 @@ export function getScoreLabel(score) {
 
 export function computePathwayFit(profile, pathwayId) {
   const goalFits = {
-    'Conceive': { natural: 85, iui: 70, ivf: 75, freeze: 30, donor: 45, surrogate: 25 },
-    'Freeze eggs': { natural: 20, iui: 15, ivf: 40, freeze: 95, donor: 25, surrogate: 15 },
-    'Explore options': { natural: 80, iui: 65, ivf: 70, freeze: 60, donor: 50, surrogate: 35 },
-    'In treatment': { natural: 40, iui: 60, ivf: 85, freeze: 50, donor: 55, surrogate: 40 },
-    'Donor/surrogacy': { natural: 20, iui: 30, ivf: 55, freeze: 25, donor: 90, surrogate: 85 },
+    'Conceive': { natural: 85, iui: 70, ivf: 75, freeze: 30, splitFreeze: 25, donor: 45, surrogate: 25 },
+    'Freeze eggs': { natural: 20, iui: 15, ivf: 40, freeze: 95, splitFreeze: 85, donor: 25, surrogate: 15 },
+    'Explore options': { natural: 80, iui: 65, ivf: 70, freeze: 60, splitFreeze: 55, donor: 50, surrogate: 35 },
+    'In treatment': { natural: 40, iui: 60, ivf: 85, freeze: 50, splitFreeze: 40, donor: 55, surrogate: 40 },
+    'Donor/surrogacy': { natural: 20, iui: 30, ivf: 55, freeze: 25, splitFreeze: 30, donor: 90, surrogate: 85 },
   };
   const base = goalFits[profile.goal]?.[pathwayId] || 50;
-  const ageMod = profile.age === '41+' ? -10 : profile.age === 'Under 30' ? 5 : 0;
+  let ageMod = profile.age === '41+' ? -10 : profile.age === 'Under 30' ? 5 : 0;
+  // Donor-funded freezing has strict age eligibility (typically 21–32)
+  if (pathwayId === 'splitFreeze') {
+    if (profile.age === '38–40' || profile.age === '41+') ageMod -= 40;
+    else if (profile.age === '35–37') ageMod -= 15;
+    else if (profile.age === 'Under 30') ageMod += 10;
+  }
+  // Cost-concerned users get a big boost for the free option
+  if (pathwayId === 'splitFreeze' && profile.concern === 'Cost') ageMod += 15;
   return Math.max(0, Math.min(100, base + ageMod));
 }
