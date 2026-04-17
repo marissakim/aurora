@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { questions } from '../data/questions';
-import { colors, gradients } from '../theme';
+import { colors, gradients, fonts } from '../theme';
 
 export default function Onboarding({ onComplete }) {
   const [current, setCurrent] = useState(0);
@@ -43,7 +43,7 @@ export default function Onboarding({ onComplete }) {
       flexDirection: 'column',
       alignItems: 'center',
       padding: '40px 20px',
-      fontFamily: 'Arial, sans-serif',
+      fontFamily: fonts.family,
     }}>
       {/* Progress bar */}
       <div style={{ width: '100%', maxWidth: 520, marginBottom: 40 }}>
@@ -85,7 +85,7 @@ export default function Onboarding({ onComplete }) {
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
-            background: '#FCE4EC',
+            background: '#F3E3D9',
             color: colors.rose,
             marginBottom: 16,
           }}>
@@ -112,13 +112,13 @@ export default function Onboarding({ onComplete }) {
                   padding: '16px 20px',
                   borderRadius: 12,
                   border: `2px solid ${isSelected ? colors.plum : colors.border}`,
-                  background: isSelected ? '#F3E8FF' : '#fff',
+                  background: isSelected ? '#F0EAEC' : '#fff',
                   cursor: 'pointer',
                   fontSize: 16,
                   fontWeight: 500,
                   color: colors.text,
                   transition: 'all 0.15s ease',
-                  fontFamily: 'Arial, sans-serif',
+                  fontFamily: fonts.family,
                 }}
               >
                 {option}

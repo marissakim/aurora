@@ -89,7 +89,7 @@ export default function Pathways({ profile, onPathwaySelected }) {
 
                   {reasoning[p.id] && (
                     <div style={{
-                      background: 'linear-gradient(135deg, #FAF7FC 0%, #FDF4F5 100%)',
+                      background: 'linear-gradient(135deg, #FBF9F5 0%, #F7EBE6 100%)',
                       border: `1px solid ${colors.border}`,
                       borderRadius: 10,
                       padding: 14,
@@ -101,7 +101,7 @@ export default function Pathways({ profile, onPathwaySelected }) {
                       <Sparkles size={16} color={colors.plum} style={{ flexShrink: 0, marginTop: 2 }} />
                       <div>
                         <p style={{ fontSize: 11, fontWeight: 700, color: colors.plum, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 4px' }}>
-                          Aurora Reasoning
+                          Eve Reasoning
                         </p>
                         <p style={{ fontSize: 13, color: colors.text, margin: 0, lineHeight: 1.5 }}>
                           {reasoning[p.id]}

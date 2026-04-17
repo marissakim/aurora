@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Star, MapPin, TrendingUp, DollarSign, ExternalLink, Video } from 'lucide-react';
-import { colors, cardStyle, gradients } from '../../theme';
+import { colors, cardStyle, gradients, fonts } from '../../theme';
 import { clinics } from '../../data/clinics';
 import { telehealthProviders } from '../../data/telehealth';
 
@@ -31,7 +31,7 @@ export default function FindClinics({ profile, initialFilter }) {
           placeholder="Search by location..."
           style={{
             border: 'none', outline: 'none', flex: 1,
-            fontSize: 15, color: colors.text, fontFamily: 'Arial, sans-serif',
+            fontSize: 15, color: colors.text, fontFamily: fonts.family,
             background: 'transparent',
           }}
         />
@@ -47,12 +47,12 @@ export default function FindClinics({ profile, initialFilter }) {
               padding: '8px 18px',
               borderRadius: 10,
               border: `2px solid ${activeFilter === f ? colors.plum : colors.border}`,
-              background: activeFilter === f ? '#F3E8FF' : '#fff',
+              background: activeFilter === f ? '#F0EAEC' : '#fff',
               color: activeFilter === f ? colors.plum : colors.textLight,
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
-              fontFamily: 'Arial, sans-serif',
+              fontFamily: fonts.family,
             }}
           >
             {f}
@@ -174,7 +174,7 @@ export default function FindClinics({ profile, initialFilter }) {
                   </div>
                 </div>
                 <button style={{
-                  background: '#F3E8FF',
+                  background: '#F0EAEC',
                   color: colors.plum,
                   border: 'none',
                   padding: '8px 16px',

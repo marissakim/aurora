@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp, AlertCircle, Sparkles, RefreshCw, Video, ArrowRight } from 'lucide-react';
 import { colors, gradients, cardStyle } from '../../theme';
-import { computeAuroraScore, computeDimensions, getScoreLabel } from '../../utils/scoring';
+import { computeEveScore, computeDimensions, getScoreLabel } from '../../utils/scoring';
 import { generateAnalysis } from '../../utils/aiInsights';
 import { sampleBiomarkers } from '../../data/biomarkers';
 import ProgressRing from '../ui/ProgressRing';
@@ -24,8 +24,8 @@ const nextSteps = [
 const insightTheme = {
   positive: { icon: TrendingUp, bg: '#E8F5E9', color: '#2E7D32' },
   warning: { icon: AlertCircle, bg: '#FFF3E0', color: '#E0901A' },
-  suggestion: { icon: Zap, bg: '#F3E8FF', color: '#5B3E8A' },
-  data: { icon: Calendar, bg: '#E0F2F1', color: '#3A8B8B' },
+  suggestion: { icon: Zap, bg: '#F0EAEC', color: '#3D2E3D' },
+  data: { icon: Calendar, bg: '#E0F2F1', color: '#6B8F8F' },
 };
 
 function Shimmer({ width = '100%', height = 16, style = {} }) {
@@ -41,7 +41,7 @@ function Shimmer({ width = '100%', height = 16, style = {} }) {
 }
 
 export default function MyIndex({ profile, onNavigate }) {
-  const score = computeAuroraScore(profile);
+  const score = computeEveScore(profile);
   const scoreLabel = getScoreLabel(score);
   const dims = computeDimensions(profile);
   const radarData = Object.entries(dims).map(([dim, val]) => ({ dimension: dim, value: val, fullMark: 100 }));
@@ -68,7 +68,7 @@ export default function MyIndex({ profile, onNavigate }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 24 }}>
         <Card style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 28 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 12px' }}>
-            Your Aurora Score
+            Your Eve Score
           </p>
           <ProgressRing score={score} />
           <p style={{ fontSize: 20, fontWeight: 700, color: colors.plum, margin: '12px 0 4px' }}>{scoreLabel}</p>
@@ -92,11 +92,11 @@ export default function MyIndex({ profile, onNavigate }) {
         </Card>
       </div>
 
-      {/* Aurora Analysis (AI) */}
+      {/* Eve Analysis (AI) */}
       <Card style={{
         padding: 24,
         marginBottom: 24,
-        background: 'linear-gradient(135deg, #FAF7FC 0%, #FDF4F5 100%)',
+        background: 'linear-gradient(135deg, #FBF9F5 0%, #F7EBE6 100%)',
         border: `1px solid ${colors.border}`,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -110,7 +110,7 @@ export default function MyIndex({ profile, onNavigate }) {
               <Sparkles size={18} color="#fff" />
             </div>
             <div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>Aurora Analysis</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>Eve Analysis</h3>
               <p style={{ fontSize: 11, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: '2px 0 0' }}>
                 AI-personalized for your profile
               </p>
@@ -283,7 +283,7 @@ export default function MyIndex({ profile, onNavigate }) {
 
       {/* Disclaimer */}
       <p style={{ fontSize: 11, color: colors.textLight, textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-        Aurora Analysis is AI-generated decision support, not a medical diagnosis. Always consult a reproductive endocrinologist for clinical decisions.
+        Eve Analysis is AI-generated decision support, not a medical diagnosis. Always consult a reproductive endocrinologist for clinical decisions.
       </p>
     </div>
   );

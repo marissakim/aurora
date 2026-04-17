@@ -27,7 +27,7 @@ export default function ProgressRing({ score, size = 180, strokeWidth = 12 }) {
       <text
         x={size / 2} y={size / 2}
         textAnchor="middle" dominantBaseline="central"
-        style={{ transform: 'rotate(90deg)', transformOrigin: 'center', fontSize: size * 0.28, fontWeight: 800, fill: colors.text, fontFamily: 'Arial' }}
+        style={{ transform: 'rotate(90deg)', transformOrigin: 'center', fontSize: size * 0.28, fontWeight: 800, fill: colors.text, fontFamily: '-apple-system, BlinkMacSystemFont, Inter, sans-serif' }}
       >
         {score}
       </text>

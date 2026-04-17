@@ -80,7 +80,7 @@ export default function Costs() {
             <div key={res.title} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
-                background: '#F3E8FF',
+                background: '#F0EAEC',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
               }}>

@@ -5,9 +5,10 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Helvetica Neue", Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
 }
 
 #root {
@@ -16,28 +17,28 @@ body {
 
 /* Responsive landing headline */
 @media (max-width: 600px) {
-  .aurora-hero-headline {
-    font-size: 32px !important;
+  .eve-hero-headline {
+    font-size: 40px !important;
   }
-  .aurora-hero-subhead {
+  .eve-hero-subhead {
     font-size: 16px !important;
   }
 }
 
 /* AI loading shimmer */
-@keyframes aurora-shimmer {
+@keyframes eve-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
 /* Spin for regenerate button */
-@keyframes aurora-spin {
+@keyframes eve-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 /* Fade in for AI-revealed insights */
-@keyframes aurora-fade-in {
+@keyframes eve-fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }

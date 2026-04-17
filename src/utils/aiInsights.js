@@ -122,10 +122,10 @@ function generateSummary(profile, biomarkers, score) {
   const attentionMarkers = biomarkers.filter(m => m.status === 'attention').map(m => m.name);
 
   const lead = score >= 76
-    ? `Your biomarkers tell a strong story — an Aurora Score of ${score} places you in the top tier for your age group.`
+    ? `Your biomarkers tell a strong story — an Eve Score of ${score} places you in the top tier for your age group.`
     : score >= 51
-      ? `Your Aurora Score of ${score} reflects a generally healthy reproductive profile with a few areas to optimize.`
-      : `Your Aurora Score of ${score} indicates several modifiable factors that, if addressed, could meaningfully improve outcomes.`;
+      ? `Your Eve Score of ${score} reflects a generally healthy reproductive profile with a few areas to optimize.`
+      : `Your Eve Score of ${score} indicates several modifiable factors that, if addressed, could meaningfully improve outcomes.`;
 
   const markerNote = criticalMarkers.length > 0
     ? ` The one area requiring attention is ${criticalMarkers.join(', ')}, which is actionable over 8–12 weeks.`

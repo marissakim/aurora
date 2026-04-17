@@ -28,7 +28,7 @@ const weights = {
   'Medical History': 0.10,
 };
 
-export function computeAuroraScore(profile) {
+export function computeEveScore(profile) {
   const dims = computeDimensions(profile);
   let score = 0;
   for (const [dim, weight] of Object.entries(weights)) {

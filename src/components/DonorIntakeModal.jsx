@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
-import { colors, gradients } from '../theme';
+import { colors, gradients, fonts } from '../theme';
 
 const questions = [
   {
@@ -73,9 +73,9 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, background: 'rgba(29, 16, 64, 0.6)', backdropFilter: 'blur(4px)',
+        position: 'fixed', inset: 0, background: 'rgba(31, 24, 37, 0.55)', backdropFilter: 'blur(4px)',
         zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 20, fontFamily: 'Arial, sans-serif',
+        padding: 20, fontFamily: fonts.family,
       }}
     >
       <div
@@ -150,9 +150,9 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
                       width: '100%', textAlign: 'left', padding: '14px 18px',
                       borderRadius: 10,
                       border: `2px solid ${isSelected ? colors.plum : colors.border}`,
-                      background: isSelected ? '#F3E8FF' : '#fff',
+                      background: isSelected ? '#F0EAEC' : '#fff',
                       cursor: 'pointer', fontSize: 15, fontWeight: 500,
-                      color: colors.text, fontFamily: 'Arial, sans-serif',
+                      color: colors.text, fontFamily: fonts.family,
                       transition: 'all 0.15s',
                     }}
                   >
@@ -218,7 +218,7 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
             </div>
 
             <div style={{
-              background: '#F3E8FF',
+              background: '#F0EAEC',
               borderRadius: 10,
               padding: 12,
               marginBottom: 16,
@@ -231,7 +231,7 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
             </div>
 
             <p style={{ fontSize: 12, color: colors.textLight, lineHeight: 1.5, margin: '0 0 20px' }}>
-              Aurora shares your intake with partner agencies in compliance with ASRM and FDA donor guidelines. You can withdraw consent at any time.
+              Eve shares your intake with partner agencies in compliance with ASRM and FDA donor guidelines. You can withdraw consent at any time.
             </p>
 
             <button
@@ -240,7 +240,7 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
                 width: '100%', background: gradients.purpleRose, color: '#fff',
                 border: 'none', padding: '12px 24px', borderRadius: 10,
                 fontSize: 15, fontWeight: 600, cursor: 'pointer',
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: fonts.family,
               }}
             >
               Got it

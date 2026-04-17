@@ -34,7 +34,7 @@ function EducationSection({ edu }) {
   ];
   return (
     <div style={{
-      background: '#FAF7FC',
+      background: colors.bg,
       borderRadius: 10,
       padding: 16,
       marginTop: 12,

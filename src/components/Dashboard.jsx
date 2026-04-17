@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Sun, Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
-import { colors, gradients } from '../theme';
+import { Leaf, Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
+import { colors, gradients, fonts } from '../theme';
 import MyIndex from './tabs/MyIndex';
 import Biomarkers from './tabs/Biomarkers';
 import Pathways from './tabs/Pathways';
@@ -44,12 +44,12 @@ export default function Dashboard({ profile }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg, fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: colors.bg, fontFamily: fonts.family }}>
       {/* Top nav */}
       <div style={{
         background: '#fff',
         borderBottom: `1px solid ${colors.border}`,
-        padding: '12px 24px',
+        padding: '14px 24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -58,9 +58,15 @@ export default function Dashboard({ profile }) {
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Sun size={24} color={colors.gold} />
-          <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: 1.5, color: colors.plum, textTransform: 'uppercase' }}>
-            AURORA
+          <Leaf size={18} color={colors.sage} strokeWidth={1.5} style={{ transform: 'rotate(-15deg)' }} />
+          <span style={{
+            fontSize: 22,
+            fontFamily: fonts.serif,
+            fontWeight: 400,
+            letterSpacing: -0.3,
+            color: colors.plum,
+          }}>
+            Eve
           </span>
         </div>
         <div style={{
@@ -105,7 +111,7 @@ export default function Dashboard({ profile }) {
                 color: isActive ? colors.plum : colors.textLight,
                 whiteSpace: 'nowrap',
                 transition: 'all 0.15s',
-                fontFamily: 'Arial, sans-serif',
+                fontFamily: fonts.family,
               }}
             >
               <Icon size={16} />

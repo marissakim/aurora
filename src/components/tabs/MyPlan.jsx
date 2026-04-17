@@ -5,8 +5,8 @@ import { getPlanForPathway } from '../../data/plan';
 
 const categoryColors = {
   Health: { bg: '#E8F5E9', color: '#2E7D32' },
-  Appointment: { bg: '#F3E8FF', color: '#5B3E8A' },
-  Financial: { bg: '#FFF8E1', color: '#E8A840' },
+  Appointment: { bg: '#F0EAEC', color: '#3D2E3D' },
+  Financial: { bg: '#FFF8E1', color: '#B8924A' },
   Legal: { bg: '#FFEBEE', color: '#C2185B' },
 };
 
