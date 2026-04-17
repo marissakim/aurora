@@ -1,6 +1,11 @@
 // Custom Eve logo mark: a stylized apple with a leaf — evoking the
 // fruit of the tree of knowledge from the Eden story. Drawn in a clean
 // single-stroke style to match the rest of the design system.
+//
+// Body is rendered as two halves meeting at a single top cleft (instead
+// of a separate "dimple" path overlaying a circle), giving a more
+// refined cardioid silhouette. Stem leans slightly to balance the leaf,
+// and the leaf includes a center vein for added detail.
 export default function EveLogo({ size = 48, color = 'currentColor', strokeWidth = 1.5 }) {
   return (
     <svg
@@ -18,14 +23,16 @@ export default function EveLogo({ size = 48, color = 'currentColor', strokeWidth
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {/* Apple body — slightly heart-shaped with a soft top dimple */}
-        <path d="M24 22 C13 22, 7 30, 7 39 C7 48, 14 54, 24 54 C34 54, 41 48, 41 39 C41 30, 35 22, 24 22 Z" />
-        {/* Subtle dimple at top of the apple */}
-        <path d="M19 24 C21 22, 23 22, 24 23 C25 22, 27 22, 29 24" opacity="0.7" />
-        {/* Stem */}
-        <path d="M24 22 L24 14" />
-        {/* Leaf curving off the stem */}
-        <path d="M24 14 C28 8, 35 7, 40 10 C38 17, 32 20, 25 16" />
+        {/* Apple body — left half, from top cleft around to bottom */}
+        <path d="M24 22.5 C20 19, 13 20.5, 9 27 C5 33, 6 44, 12 49 C16 53, 20 53, 24 52" />
+        {/* Apple body — right half, mirror of the left */}
+        <path d="M24 22.5 C28 19, 35 20.5, 39 27 C43 33, 42 44, 36 49 C32 53, 28 53, 24 52" />
+        {/* Stem — slight leftward lean to feel hand-drawn */}
+        <path d="M24 22.5 C23.5 18, 22 15, 20 12" />
+        {/* Leaf — tapered teardrop curving up and to the right */}
+        <path d="M20 12 C25 7, 33 7, 36 11 C33 17, 27 18, 21 14" />
+        {/* Leaf vein — subtle line along the leaf for refinement */}
+        <path d="M21 14 C25 12, 30 11, 34 11" strokeWidth={strokeWidth * 0.65} opacity="0.5" />
       </g>
     </svg>
   );
