@@ -60,19 +60,21 @@ export default function LandingPage({ onGetStarted }) {
       <p
         className="eve-hero-tagline"
         style={{
-          fontSize: 26,
+          fontSize: 28,
           fontFamily: fonts.serif,
           fontStyle: 'italic',
           fontWeight: 400,
-          color: 'rgba(251, 249, 245, 0.85)',
+          color: 'rgba(251, 249, 245, 0.9)',
           textAlign: 'center',
           margin: '0 0 32px',
           letterSpacing: -0.3,
+          lineHeight: 1.35,
           position: 'relative',
           zIndex: 1,
         }}
       >
-        Begin your Fertility Journey
+        The time is now.<br />
+        The plan is yours.
       </p>
 
       <p
