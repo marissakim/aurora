@@ -47,7 +47,7 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
       case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;
-      case 'plan': return <MyPlan selectedPathway={selectedPathway} onNavigate={navigate} />;
+      case 'plan': return <MyPlan profile={profile} selectedPathway={selectedPathway} onNavigate={navigate} />;
       default: return null;
     }
   };

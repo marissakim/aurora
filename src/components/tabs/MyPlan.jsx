@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Sparkles } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
 import { getPlanForPathway } from '../../data/plan';
+import { composePlan } from '../../utils/planComposer';
 
 const categoryColors = {
   Health: { bg: '#E8F5E9', color: '#2E7D32' },
@@ -19,10 +20,15 @@ const pathwayBadges = {
   },
 };
 
-export default function MyPlan({ selectedPathway, onNavigate }) {
+export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
   const [completed, setCompleted] = useState(new Set());
-  const plan = getPlanForPathway(selectedPathway);
+  // When user has committed to a specific pathway (e.g. donor-funded), use
+  // that hand-authored plan. Otherwise compose from their onboarding profile.
+  const plan = selectedPathway
+    ? getPlanForPathway(selectedPathway)
+    : composePlan(profile);
   const badge = selectedPathway ? pathwayBadges[selectedPathway] : null;
+  const isComposed = !selectedPathway;
 
   function toggleTask(id) {
     setCompleted(prev => {
@@ -39,6 +45,25 @@ export default function MyPlan({ selectedPathway, onNavigate }) {
       <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px' }}>
         Your personalized action plan based on your profile and goals.
       </p>
+
+      {/* AI-personalized hint shown when plan is composed from onboarding profile */}
+      {isComposed && !badge && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          background: 'linear-gradient(135deg, #FBF9F5 0%, #F7EBE6 100%)',
+          border: `1px solid ${colors.border}`,
+          borderRadius: 10,
+          padding: '12px 14px',
+          marginBottom: 20,
+        }}>
+          <Sparkles size={16} color={colors.spice} />
+          <p style={{ fontSize: 13, color: colors.text, margin: 0, lineHeight: 1.5 }}>
+            This plan is composed from your onboarding answers. It&apos;ll adapt as you add biomarkers and mark off steps.
+          </p>
+        </div>
+      )}
 
       {/* Pathway badge shown when user has committed to a specific pathway */}
       {badge && (
