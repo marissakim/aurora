@@ -1,15 +1,25 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Plus, Info, ChevronDown } from 'lucide-react';
-import { colors, cardStyle, gradients } from '../../theme';
-import { sampleBiomarkers, biomarkerEducation } from '../../data/biomarkers';
+import { Plus, Info, ChevronDown, FlaskConical } from 'lucide-react';
+import { colors, cardStyle, fonts } from '../../theme';
+import { biomarkerEducation } from '../../data/biomarkers';
 import StatusBadge from '../ui/StatusBadge';
+import AddBiomarkersModal from '../AddBiomarkersModal';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
 
 function MiniSparkline({ data, status }) {
   const strokeColor = status === 'good' ? colors.sage : status === 'attention' ? '#E0901A' : '#D32F2F';
   const w = 80, h = 30, pad = 3;
+  if (!data || data.length === 0) return null;
+  // Single data point — draw a dot instead of a line
+  if (data.length === 1) {
+    return (
+      <svg width={w} height={h} style={{ display: 'block' }}>
+        <circle cx={w / 2} cy={h / 2} r="3" fill={strokeColor} />
+      </svg>
+    );
+  }
   const min = Math.min(...data), max = Math.max(...data);
   const range = max - min || 1;
   const points = data.map((v, i) => {
@@ -66,26 +76,132 @@ function EducationSection({ edu }) {
   );
 }
 
-export default function Biomarkers() {
+// Friendly empty state — trusted-guide tone, clear CTAs, not pushy.
+function EmptyBiomarkers({ onAdd, onGetTested }) {
+  return (
+    <div style={{
+      ...cardStyle,
+      padding: 32,
+      textAlign: 'center',
+      background: 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)',
+      border: `1px solid ${colors.border}`,
+    }}>
+      <div style={{
+        width: 56, height: 56, borderRadius: 14,
+        background: colors.bg,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: 16,
+      }}>
+        <FlaskConical size={26} color={colors.plum} />
+      </div>
+      <h3 style={{
+        fontSize: 22, fontFamily: fonts.serif, fontWeight: 400,
+        color: colors.text, margin: '0 0 8px',
+        letterSpacing: -0.3,
+      }}>
+        Let&apos;s add your first results
+      </h3>
+      <p style={{
+        fontSize: 14, color: colors.textLight,
+        margin: '0 auto 20px', maxWidth: 480, lineHeight: 1.6,
+      }}>
+        Your biomarkers help Eve give you personalized insights and a plan that reflects
+        where you actually are. Enter what you have, or find affordable virtual testing
+        if you haven&apos;t been tested yet.
+      </p>
+      <div style={{
+        display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap',
+      }}>
+        <button
+          onClick={onAdd}
+          style={{
+            background: colors.spice,
+            color: '#FBF9F5',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: 999,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: fonts.family,
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 4px 16px rgba(122, 66, 50, 0.25)',
+          }}
+        >
+          <Plus size={16} /> Add my results
+        </button>
+        <button
+          onClick={onGetTested}
+          style={{
+            background: '#fff',
+            color: colors.text,
+            border: `1px solid ${colors.border}`,
+            padding: '12px 22px',
+            borderRadius: 999,
+            fontSize: 14,
+            fontWeight: 500,
+            cursor: 'pointer',
+            fontFamily: fonts.family,
+          }}
+        >
+          Find testing options
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavigate }) {
   const [expanded, setExpanded] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // Empty state: prompt user to add results or find testing
+  if (biomarkers.length === 0) {
+    return (
+      <div>
+        <h2 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>
+          Biomarkers
+        </h2>
+        <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 20px' }}>
+          The numbers that tell your fertility story.
+        </p>
+        <EmptyBiomarkers
+          onAdd={() => setShowAddModal(true)}
+          onGetTested={() => onNavigate?.('clinics', { filter: 'Virtual Care' })}
+        />
+        {showAddModal && (
+          <AddBiomarkersModal
+            existing={biomarkers}
+            onClose={() => setShowAddModal(false)}
+            onSave={onUpdateBiomarkers}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <h2 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: 0 }}>Biomarkers</h2>
-        <button style={{
-          background: gradients.purpleRose,
-          color: '#fff',
-          border: 'none',
-          padding: '10px 20px',
-          borderRadius: 10,
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-        }}>
+        <button
+          onClick={() => setShowAddModal(true)}
+          style={{
+            background: colors.spice,
+            color: '#FBF9F5',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: 999,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontFamily: fonts.family,
+            boxShadow: '0 3px 12px rgba(122, 66, 50, 0.25)',
+          }}
+        >
           <Plus size={16} /> Log Results
         </button>
       </div>
@@ -94,10 +210,14 @@ export default function Biomarkers() {
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-        {sampleBiomarkers.map(marker => {
+        {biomarkers.map(marker => {
           const isExpanded = expanded === marker.name;
-          const chartData = marker.trend.map((v, i) => ({ month: months[i], value: v }));
           const edu = biomarkerEducation[marker.name];
+          // Pad trend to 5 points for chart display if fewer exist
+          const padded = marker.trend.length < 5
+            ? Array(5 - marker.trend.length).fill(null).concat(marker.trend)
+            : marker.trend.slice(-5);
+          const chartData = padded.map((v, i) => ({ month: months[i], value: v }));
           return (
             <div
               key={marker.name}
@@ -127,16 +247,26 @@ export default function Biomarkers() {
 
               {isExpanded && (
                 <div style={{ marginTop: 16, borderTop: `1px solid ${colors.border}`, paddingTop: 16 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: colors.textLight, margin: '0 0 8px' }}>5-Month Trend</p>
-                  <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-                      <XAxis dataKey="month" tick={{ fontSize: 12, fill: colors.textLight }} />
-                      <YAxis tick={{ fontSize: 12, fill: colors.textLight }} />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="value" stroke={colors.plum} strokeWidth={2} dot={{ r: 4, fill: colors.plum }} />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {marker.trend.length > 1 ? (
+                    <>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: colors.textLight, margin: '0 0 8px' }}>
+                        Trend ({marker.trend.length} point{marker.trend.length > 1 ? 's' : ''})
+                      </p>
+                      <ResponsiveContainer width="100%" height={150}>
+                        <LineChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                          <XAxis dataKey="month" tick={{ fontSize: 12, fill: colors.textLight }} />
+                          <YAxis tick={{ fontSize: 12, fill: colors.textLight }} />
+                          <Tooltip />
+                          <Line type="monotone" dataKey="value" stroke={colors.plum} strokeWidth={2} dot={{ r: 4, fill: colors.plum }} connectNulls />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </>
+                  ) : (
+                    <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 4px', fontStyle: 'italic' }}>
+                      Add more results over time to see your trend.
+                    </p>
+                  )}
                   <EducationSection edu={edu} />
                 </div>
               )}
@@ -144,6 +274,14 @@ export default function Biomarkers() {
           );
         })}
       </div>
+
+      {showAddModal && (
+        <AddBiomarkersModal
+          existing={biomarkers}
+          onClose={() => setShowAddModal(false)}
+          onSave={onUpdateBiomarkers}
+        />
+      )}
     </div>
   );
 }

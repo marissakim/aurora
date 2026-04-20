@@ -20,8 +20,8 @@ export default function ProgressRing({ score, size = 180, strokeWidth = 12 }) {
       />
       <defs>
         <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={colors.plum} />
-          <stop offset="100%" stopColor={colors.rose} />
+          <stop offset="0%" stopColor={colors.spice} />
+          <stop offset="100%" stopColor={colors.gold} />
         </linearGradient>
       </defs>
       <text

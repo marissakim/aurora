@@ -43,7 +43,7 @@ export default function MyPlan({ selectedPathway, onNavigate }) {
       {/* Pathway badge shown when user has committed to a specific pathway */}
       {badge && (
         <div style={{
-          background: gradients.roseGold,
+          background: gradients.spiceDeep,
           borderRadius: 12,
           padding: 16,
           marginBottom: 24,
@@ -106,9 +106,10 @@ export default function MyPlan({ selectedPathway, onNavigate }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 40, flexShrink: 0 }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
-              background: gradients.purpleRose,
+              background: gradients.spice,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', fontSize: 16, fontWeight: 700,
+              boxShadow: '0 2px 8px rgba(122, 66, 50, 0.2)',
             }}>
               {pi + 1}
             </div>

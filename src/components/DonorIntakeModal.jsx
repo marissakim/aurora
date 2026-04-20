@@ -237,10 +237,17 @@ export default function DonorIntakeModal({ profile, onClose, onSubmitted }) {
             <button
               onClick={onClose}
               style={{
-                width: '100%', background: gradients.purpleRose, color: '#fff',
-                border: 'none', padding: '12px 24px', borderRadius: 10,
-                fontSize: 15, fontWeight: 600, cursor: 'pointer',
+                width: '100%',
+                background: colors.spice,
+                color: '#FBF9F5',
+                border: 'none',
+                padding: '14px 24px',
+                borderRadius: 999,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
                 fontFamily: fonts.family,
+                boxShadow: '0 4px 16px rgba(122, 66, 50, 0.25)',
               }}
             >
               Got it

@@ -214,7 +214,7 @@ export default function FindClinics({ profile, initialFilter }) {
       {/* Donor CTA */}
       <div style={{
         borderRadius: 14, padding: 24, marginBottom: 16,
-        background: gradients.purpleRose,
+        background: gradients.spiceDeep,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <div>

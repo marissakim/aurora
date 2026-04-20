@@ -123,15 +123,17 @@ export default function Pathways({ profile, onPathwaySelected }) {
                       onClick={(e) => { e.stopPropagation(); setShowDonorIntake(true); }}
                       style={{
                         marginTop: 16,
-                        background: gradients.roseGold,
-                        color: '#fff',
+                        background: colors.spice,
+                        color: '#FBF9F5',
                         border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: 10,
+                        padding: '14px 24px',
+                        borderRadius: 999,
                         fontSize: 14,
                         fontWeight: 700,
                         cursor: 'pointer',
                         width: '100%',
+                        fontFamily: 'inherit',
+                        boxShadow: '0 4px 16px rgba(122, 66, 50, 0.3)',
                       }}
                     >
                       💝 Start Eligibility Intake (2 min)
@@ -139,15 +141,17 @@ export default function Pathways({ profile, onPathwaySelected }) {
                   ) : (
                     <button style={{
                       marginTop: 16,
-                      background: gradients.purpleRose,
-                      color: '#fff',
+                      background: colors.spice,
+                      color: '#FBF9F5',
                       border: 'none',
-                      padding: '10px 24px',
-                      borderRadius: 10,
+                      padding: '12px 24px',
+                      borderRadius: 999,
                       fontSize: 14,
                       fontWeight: 600,
                       cursor: 'pointer',
                       width: '100%',
+                      fontFamily: 'inherit',
+                      boxShadow: '0 3px 12px rgba(122, 66, 50, 0.25)',
                     }}>
                       Add to My Plan
                     </button>

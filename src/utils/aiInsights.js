@@ -144,9 +144,37 @@ function generateSummary(profile, biomarkers, score) {
   return lead + markerNote + pathCue;
 }
 
+function generateWelcomeSummary(profile) {
+  const timelineCue = profile.timeline === 'Now'
+    ? "Since you're looking to start now, the most useful next step is usually a baseline fertility panel — it takes 5–10 days and costs around $179."
+    : profile.timeline === 'Within 6 months'
+      ? "You have a comfortable window to gather baseline data and build a plan before making any big decisions."
+      : "With your timeline, you have time to do this thoughtfully. Start with a baseline panel whenever you're ready.";
+
+  const goalCue = profile.goal === 'Freeze eggs'
+    ? " For egg freezing specifically, your AMH and AFC are the two most predictive markers — worth prioritizing."
+    : profile.goal === 'Conceive'
+      ? " For conception, knowing your cycle regularity and baseline hormones gives you a head start with any provider."
+      : "";
+
+  return `Welcome to Eve. I've built an initial view from your profile — but the picture gets sharper once you add some biomarkers. ${timelineCue}${goalCue}`;
+}
+
 function generatePathwayReasoning(profile, biomarkers) {
   const amh = biomarkers.find(m => m.name === 'AMH');
   const vitD = biomarkers.find(m => m.name === 'Vitamin D');
+  // Empty-biomarker fallback — reasoning is profile-only, no numerical references
+  if (!amh) {
+    return {
+      natural: `Given your age bracket (${profile.age}), natural conception often has favorable odds — especially with regular cycles. A basic workup can confirm.`,
+      iui: `IUI is often a reasonable bridge between natural conception and IVF. Most people try 3 cycles before considering next steps.`,
+      ivf: `IVF tends to offer the highest per-cycle success rate — but the right protocol depends heavily on your ovarian reserve markers (AMH, AFC), which we don't have yet.`,
+      freeze: `Egg freezing is time-sensitive. A baseline AMH and AFC will tell you how many cycles you'd likely need at your age.`,
+      splitFreeze: `Donor-funded freezing could match the quality of a self-pay cycle at $0 out of pocket, if you meet the agency's eligibility criteria (typically age 21–32, good health).`,
+      donor: `Donor eggs are typically considered when ovarian reserve is severely diminished or after repeated IVF failure.`,
+      surrogate: `Gestational surrogacy is most commonly chosen for medical inability to carry, not as a first-line option.`,
+    };
+  }
 
   return {
     natural: `Given your age bracket (${profile.age}) and regular cycles, natural conception has favorable odds — particularly in the first 6 months.`,
@@ -162,6 +190,23 @@ function generatePathwayReasoning(profile, biomarkers) {
 export async function generateAnalysis(profile, biomarkers) {
   // Simulate realistic LLM latency
   await new Promise(r => setTimeout(r, 1400));
+
+  // Empty-biomarker path: generate a welcoming summary and profile-only insights
+  if (!biomarkers || biomarkers.length === 0) {
+    const profileOnly = profileInsight(profile);
+    // Add a universal "let's get your baseline" insight at the top
+    const baselineInsight = {
+      type: 'suggestion',
+      title: 'A baseline unlocks everything',
+      text: 'Adding a few test results — even just AMH, FSH, and AFC — transforms this from a general guide into a plan tailored to you. Most people start with an at-home fertility panel ($179) before ever stepping into a clinic.',
+      priority: 10,
+    };
+    return {
+      summary: generateWelcomeSummary(profile),
+      insights: [baselineInsight, ...profileOnly.slice(0, 3)],
+      pathwayReasoning: generatePathwayReasoning(profile, []),
+    };
+  }
 
   // Compute insights from both biomarker and profile sources
   const biomarkerInsights = biomarkers.map(m => biomarkerInsight(m, profile)).filter(Boolean);

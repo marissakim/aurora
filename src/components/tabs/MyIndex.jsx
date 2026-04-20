@@ -4,7 +4,6 @@ import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp
 import { colors, gradients, cardStyle } from '../../theme';
 import { computeEveScore, computeDimensions, getScoreLabel } from '../../utils/scoring';
 import { generateAnalysis } from '../../utils/aiInsights';
-import { sampleBiomarkers } from '../../data/biomarkers';
 import ProgressRing from '../ui/ProgressRing';
 import Card from '../ui/Card';
 
@@ -34,17 +33,18 @@ function Shimmer({ width = '100%', height = 16, style = {} }) {
       width, height, borderRadius: 6,
       background: 'linear-gradient(90deg, #EEE9F2 0%, #F8F5FA 50%, #EEE9F2 100%)',
       backgroundSize: '200% 100%',
-      animation: 'aurora-shimmer 1.4s ease-in-out infinite',
+      animation: 'eve-shimmer 1.4s ease-in-out infinite',
       ...style,
     }} />
   );
 }
 
-export default function MyIndex({ profile, onNavigate }) {
+export default function MyIndex({ profile, biomarkers = [], onNavigate }) {
   const score = computeEveScore(profile);
   const scoreLabel = getScoreLabel(score);
   const dims = computeDimensions(profile);
   const radarData = Object.entries(dims).map(([dim, val]) => ({ dimension: dim, value: val, fullMark: 100 }));
+  const hasBiomarkers = biomarkers.length > 0;
 
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,14 +53,14 @@ export default function MyIndex({ profile, onNavigate }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    generateAnalysis(profile, sampleBiomarkers).then(result => {
+    generateAnalysis(profile, biomarkers).then(result => {
       if (!cancelled) {
         setAnalysis(result);
         setLoading(false);
       }
     });
     return () => { cancelled = true; };
-  }, [profile, regenCount]);
+  }, [profile, biomarkers, regenCount]);
 
   return (
     <div>
@@ -72,9 +72,30 @@ export default function MyIndex({ profile, onNavigate }) {
           </p>
           <ProgressRing score={score} />
           <p style={{ fontSize: 20, fontWeight: 700, color: colors.plum, margin: '12px 0 4px' }}>{scoreLabel}</p>
-          <p style={{ fontSize: 13, color: colors.textLight, margin: 0 }}>
-            Based on 6 biomarkers &middot; Updated 2 days ago
+          <p style={{ fontSize: 13, color: colors.textLight, margin: 0, textAlign: 'center' }}>
+            {hasBiomarkers
+              ? `Based on your profile and ${biomarkers.length} biomarker${biomarkers.length === 1 ? '' : 's'}`
+              : 'Based on your profile so far'}
           </p>
+          {!hasBiomarkers && (
+            <button
+              onClick={() => onNavigate?.('markers')}
+              style={{
+                marginTop: 12,
+                background: 'none',
+                color: colors.spice,
+                border: `1px solid ${colors.spice}`,
+                padding: '8px 16px',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              Add biomarkers to sharpen your score →
+            </button>
+          )}
         </Card>
 
         <Card style={{ padding: 16 }}>
@@ -103,9 +124,10 @@ export default function MyIndex({ profile, onNavigate }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 8,
-              background: gradients.purpleRose,
+              background: gradients.spice,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(122, 66, 50, 0.2)',
             }}>
               <Sparkles size={18} color="#fff" />
             </div>
@@ -127,7 +149,7 @@ export default function MyIndex({ profile, onNavigate }) {
               opacity: loading ? 0.4 : 1,
             }}
           >
-            <RefreshCw size={14} color={colors.textLight} style={loading ? { animation: 'aurora-spin 1s linear infinite' } : {}} />
+            <RefreshCw size={14} color={colors.textLight} style={loading ? { animation: 'eve-spin 1s linear infinite' } : {}} />
           </button>
         </div>
 
@@ -231,7 +253,7 @@ export default function MyIndex({ profile, onNavigate }) {
                 display: 'flex',
                 gap: 12,
                 alignItems: 'flex-start',
-                animation: 'aurora-fade-in 0.4s ease-out both',
+                animation: 'eve-fade-in 0.4s ease-out both',
                 animationDelay: `${i * 80}ms`,
               }}>
                 <Icon size={20} color={theme.color} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -257,7 +279,7 @@ export default function MyIndex({ profile, onNavigate }) {
         {nextSteps.map((step, i) => (
           <div key={i} style={{
             ...cardStyle,
-            background: gradients.purpleRose,
+            background: gradients.spiceDeep,
             border: 'none',
             display: 'flex',
             justifyContent: 'space-between',

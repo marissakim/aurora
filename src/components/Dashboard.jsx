@@ -82,9 +82,10 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
         </div>
         <div style={{
           width: 36, height: 36, borderRadius: '50%',
-          background: gradients.purpleRose,
+          background: gradients.spice,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#fff', fontSize: 14, fontWeight: 700,
+          boxShadow: '0 2px 8px rgba(122, 66, 50, 0.2)',
         }}>
           {(profile.age || 'U')[0]}
         </div>
