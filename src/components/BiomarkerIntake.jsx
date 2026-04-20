@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, FlaskConical, Heart, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowLeft, FlaskConical, Heart, Sparkles, Plus, Minus } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
 import { biomarkerDefs } from '../data/biomarkers';
 
@@ -10,6 +10,10 @@ import { biomarkerDefs } from '../data/biomarkers';
 export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
   const [step, setStep] = useState('choose'); // choose | enter | tested
   const [values, setValues] = useState({});
+  const [showExtended, setShowExtended] = useState(false);
+
+  const coreDefs = biomarkerDefs.filter(d => d.tier === 'core');
+  const extendedDefs = biomarkerDefs.filter(d => d.tier === 'extended');
 
   function setValue(name, raw) {
     if (raw === '') {
@@ -146,47 +150,46 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
         padding: 20,
         maxWidth: 520,
         width: '100%',
-        marginBottom: 20,
+        marginBottom: 16,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {biomarkerDefs.map(def => (
-            <div key={def.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: colors.text, margin: '0 0 2px' }}>
-                  {def.name}
-                </p>
-                <p style={{ fontSize: 11, color: colors.textLight, margin: 0 }}>
-                  {def.description} · Normal: {def.range} {def.unit}
-                </p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="—"
-                  value={values[def.name] ?? ''}
-                  onChange={e => setValue(def.name, e.target.value)}
-                  style={{
-                    width: 90,
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    border: `1px solid ${colors.border}`,
-                    fontSize: 15,
-                    fontFamily: fonts.family,
-                    color: colors.text,
-                    textAlign: 'right',
-                    outline: 'none',
-                  }}
-                  onFocus={e => e.target.style.border = `1px solid ${colors.plum}`}
-                  onBlur={e => e.target.style.border = `1px solid ${colors.border}`}
-                />
-                <span style={{ fontSize: 12, color: colors.textLight, minWidth: 60 }}>
-                  {def.unit}
-                </span>
-              </div>
-            </div>
+          {coreDefs.map(def => (
+            <FormRow key={def.name} def={def} values={values} setValue={setValue} />
           ))}
         </div>
+
+        <button
+          onClick={() => setShowExtended(s => !s)}
+          style={{
+            background: 'none',
+            border: `1px dashed ${colors.border}`,
+            borderRadius: 10,
+            padding: '10px 14px',
+            color: colors.textLight,
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: fonts.family,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginTop: 14,
+            marginBottom: showExtended ? 14 : 0,
+            width: '100%',
+            justifyContent: 'center',
+          }}
+        >
+          {showExtended ? <Minus size={14} /> : <Plus size={14} />}
+          {showExtended ? 'Hide extended fields' : 'Show 3 more fields (from a full clinic workup)'}
+        </button>
+
+        {showExtended && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {extendedDefs.map(def => (
+              <FormRow key={def.name} def={def} values={values} setValue={setValue} />
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 520 }}>
@@ -199,6 +202,47 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
         </button>
       </div>
     </Shell>
+  );
+}
+
+// ─── Form row used for both core and extended biomarker inputs ──────
+function FormRow({ def, values, setValue }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ flex: 1 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: colors.text, margin: '0 0 2px' }}>
+          {def.name}
+        </p>
+        <p style={{ fontSize: 11, color: colors.textLight, margin: 0 }}>
+          {def.description} · Normal: {def.range} {def.unit}
+        </p>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <input
+          type="text"
+          inputMode="decimal"
+          placeholder="—"
+          value={values[def.name] ?? ''}
+          onChange={e => setValue(def.name, e.target.value)}
+          style={{
+            width: 90,
+            padding: '8px 12px',
+            borderRadius: 8,
+            border: `1px solid ${colors.border}`,
+            fontSize: 15,
+            fontFamily: fonts.family,
+            color: colors.text,
+            textAlign: 'right',
+            outline: 'none',
+          }}
+          onFocus={e => e.target.style.border = `1px solid ${colors.plum}`}
+          onBlur={e => e.target.style.border = `1px solid ${colors.border}`}
+        />
+        <span style={{ fontSize: 12, color: colors.textLight, minWidth: 60 }}>
+          {def.unit}
+        </span>
+      </div>
+    </div>
   );
 }
 

@@ -54,6 +54,42 @@ function biomarkerInsight(marker, profile) {
       priority: 6,
     };
   }
+  if (name === 'Prolactin' && marker.status !== 'good') {
+    return {
+      type: 'warning',
+      title: 'Prolactin worth rechecking',
+      text: `Your prolactin of ${marker.value} ${marker.unit} is outside the typical 3–25 ng/mL range. Mild elevations are common and can come from stress, certain medications, or small benign pituitary tumors. A repeat draw in the morning (fasting, before exercise) usually clarifies — and if it stays high, treatment is straightforward.`,
+      priority: 8,
+    };
+  }
+  if (name === 'Estradiol' && marker.status !== 'good' && marker.value > 75) {
+    return {
+      type: 'data',
+      title: 'Elevated Day-3 estradiol changes the FSH picture',
+      text: `Your Day-3 estradiol of ${marker.value} ${marker.unit} is higher than expected for early follicular phase. This can artificially suppress FSH — meaning your "normal" FSH could be masking declining reserve. Worth interpreting your full Day-3 panel together, not in isolation.`,
+      priority: 7,
+    };
+  }
+  return null;
+}
+
+// LH:FSH ratio — a PCOS signal not visible from either marker alone.
+// Returns an insight only when both markers exist and the ratio is suggestive.
+function lhFshRatioInsight(biomarkers) {
+  const lh = biomarkers.find(m => m.name === 'LH');
+  const fsh = biomarkers.find(m => m.name === 'FSH');
+  if (!lh || !fsh || typeof lh.value !== 'number' || typeof fsh.value !== 'number' || fsh.value === 0) {
+    return null;
+  }
+  const ratio = lh.value / fsh.value;
+  if (ratio >= 2) {
+    return {
+      type: 'data',
+      title: `LH:FSH ratio of ${ratio.toFixed(1)}:1 suggests a PCOS workup`,
+      text: `A ratio above 2:1 is a classic biochemical signature of PCOS. This doesn't confirm a diagnosis — but it warrants a full workup including total and free testosterone, fasting insulin, and a pelvic ultrasound. PCOS is very treatable, and the protocol changes meaningfully if you have it.`,
+      priority: 9,
+    };
+  }
   return null;
 }
 
@@ -211,7 +247,12 @@ export async function generateAnalysis(profile, biomarkers) {
   // Compute insights from both biomarker and profile sources
   const biomarkerInsights = biomarkers.map(m => biomarkerInsight(m, profile)).filter(Boolean);
   const profileInsights = profileInsight(profile);
-  const all = [...biomarkerInsights, ...profileInsights];
+  const ratioInsight = lhFshRatioInsight(biomarkers);
+  const all = [
+    ...biomarkerInsights,
+    ...(ratioInsight ? [ratioInsight] : []),
+    ...profileInsights,
+  ];
 
   // Sort by priority and keep top 4, ensuring at least one positive if available
   const sorted = all.sort((a, b) => b.priority - a.priority);

@@ -1,10 +1,19 @@
+// Biomarkers split into "core" (most commonly available, enough to start)
+// and "extended" (full clinic workup). UI uses progressive disclosure so
+// users with an at-home panel see 6 fields, users with a clinic workup
+// can expand to all 9.
 export const biomarkerDefs = [
-  { name: 'AMH', unit: 'ng/mL', range: '1.0–3.5', description: 'Ovarian reserve indicator' },
-  { name: 'FSH', unit: 'mIU/mL', range: '3.5–12.5', description: 'Egg quality and ovarian function' },
-  { name: 'AFC', unit: 'follicles', range: '10–20', description: 'Antral follicle count via ultrasound' },
-  { name: 'TSH', unit: 'mIU/L', range: '0.5–4.5', description: 'Thyroid function affects fertility' },
-  { name: 'Vitamin D', unit: 'ng/mL', range: '30–60', description: 'Impacts implantation rates' },
-  { name: 'BMI', unit: 'kg/m\u00B2', range: '18.5–24.9', description: 'Affects hormone balance and outcomes' },
+  // Core panel — matches typical at-home testing kits
+  { name: 'AMH', unit: 'ng/mL', range: '1.0–3.5', description: 'Ovarian reserve indicator', tier: 'core' },
+  { name: 'FSH', unit: 'mIU/mL', range: '3.5–12.5', description: 'Egg quality and ovarian function', tier: 'core' },
+  { name: 'AFC', unit: 'follicles', range: '10–20', description: 'Antral follicle count via ultrasound', tier: 'core' },
+  { name: 'TSH', unit: 'mIU/L', range: '0.5–4.5', description: 'Thyroid function affects fertility', tier: 'core' },
+  { name: 'Vitamin D', unit: 'ng/mL', range: '30–60', description: 'Impacts implantation rates', tier: 'core' },
+  { name: 'BMI', unit: 'kg/m\u00B2', range: '18.5–24.9', description: 'Affects hormone balance and outcomes', tier: 'core' },
+  // Extended panel — common in a full clinic workup
+  { name: 'Estradiol', unit: 'pg/mL', range: '25–75', description: 'Day-3 estrogen — paired with FSH', tier: 'extended' },
+  { name: 'LH', unit: 'mIU/mL', range: '1.9–12.5', description: 'Ovulation trigger — informs LH:FSH ratio', tier: 'extended' },
+  { name: 'Prolactin', unit: 'ng/mL', range: '3–25', description: 'Elevated levels can disrupt cycles', tier: 'extended' },
 ];
 
 // Educational content shown in the expanded biomarker card.
@@ -57,6 +66,30 @@ export const biomarkerEducation = {
     whyItMatters: 'Very high or very low BMI disrupts ovulation, hormone balance (estrogen, insulin), and IVF response. Egg and embryo quality also suffer at extremes.',
     whatYouCanDo: 'Even a 5–10% weight change can restore regular ovulation and improve outcomes. Work with a registered dietitian rather than crash-dieting — sudden loss can hurt cycles.',
     testingCadence: 'Monthly self-check at home; before starting any treatment cycle.',
+  },
+  'Estradiol': {
+    fullName: 'Estradiol (E2)',
+    whatItIs: 'The primary form of estrogen in your body. Produced mostly by growing follicles in the ovaries. Almost always drawn together with Day-3 FSH.',
+    whatNumberMeans: 'Day 3: 25–75 pg/mL is normal. Above 80 on Day 3 can indicate early follicle recruitment, which artificially suppresses FSH and masks declining reserve.',
+    whyItMatters: 'Context for FSH. A "normal" FSH with elevated E2 can actually mean ovarian reserve is worse than it looks. Most clinics require both numbers to interpret either.',
+    whatYouCanDo: 'Always check E2 alongside FSH on cycle Day 2–4. If it\'s high, your FSH needs to be interpreted more cautiously.',
+    testingCadence: 'Annually, always with Day-3 FSH. More often during IVF stimulation monitoring.',
+  },
+  'LH': {
+    fullName: 'Luteinizing Hormone',
+    whatItIs: 'The hormone that triggers ovulation mid-cycle. Also measured on Day 3 as a companion to FSH.',
+    whatNumberMeans: 'Day 3: 1.9–12.5 mIU/mL is typical. More telling is the **LH:FSH ratio** — if LH is more than 2× FSH, it\'s a classic PCOS marker.',
+    whyItMatters: 'Elevated LH disrupts the maturation of eggs and is one of the most reliable biochemical signatures of PCOS — which affects roughly 1 in 10 women of reproductive age.',
+    whatYouCanDo: 'If LH:FSH is high, a full PCOS workup (testosterone, insulin, pelvic ultrasound) is worth pursuing. PCOS is very treatable, and knowing early changes the protocol.',
+    testingCadence: 'Annually on Day 3 with FSH and E2. Urine LH strips for ovulation prediction at home.',
+  },
+  'Prolactin': {
+    fullName: 'Prolactin',
+    whatItIs: 'A pituitary hormone best known for milk production — but it also silently regulates the menstrual cycle. Elevated prolactin suppresses ovulation.',
+    whatNumberMeans: 'Non-pregnant: 3–25 ng/mL is typical. Above 25–30 is considered hyperprolactinemia and can cause missed or irregular periods.',
+    whyItMatters: 'A cheap test that catches a surprisingly common cause of unexplained infertility. Stress, certain medications (SSRIs), and small benign pituitary tumors can all raise it.',
+    whatYouCanDo: 'If elevated, a simple MRI rules out a prolactinoma. Most cases are treated with a well-tolerated oral medication (cabergoline) that normalizes levels quickly.',
+    testingCadence: 'Annually, or whenever cycles become irregular. Draw in the morning, fasting, before exercise or nipple stimulation.',
   },
 };
 
