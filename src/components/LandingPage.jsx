@@ -96,8 +96,8 @@ export default function LandingPage({ onGetStarted }) {
       <button
         onClick={onGetStarted}
         style={{
-          background: '#FBF9F5',
-          color: colors.plum,
+          background: colors.spice,
+          color: '#FBF9F5',
           border: 'none',
           padding: '16px 32px',
           borderRadius: 999,
@@ -110,17 +110,17 @@ export default function LandingPage({ onGetStarted }) {
           alignItems: 'center',
           gap: 10,
           transition: 'transform 0.2s, box-shadow 0.2s',
-          boxShadow: '0 6px 24px rgba(0,0,0,0.15)',
+          boxShadow: '0 6px 24px rgba(122, 66, 50, 0.35)',
           position: 'relative',
           zIndex: 1,
         }}
         onMouseEnter={e => {
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 10px 32px rgba(0,0,0,0.2)';
+          e.currentTarget.style.boxShadow = '0 10px 32px rgba(122, 66, 50, 0.45)';
         }}
         onMouseLeave={e => {
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.15)';
+          e.currentTarget.style.boxShadow = '0 6px 24px rgba(122, 66, 50, 0.35)';
         }}
       >
         Get started

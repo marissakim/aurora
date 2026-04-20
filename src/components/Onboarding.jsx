@@ -51,7 +51,7 @@ export default function Onboarding({ onComplete }) {
           <div style={{
             height: '100%',
             width: `${progress}%`,
-            background: gradients.purpleRose,
+            background: gradients.spice,
             borderRadius: 3,
             transition: 'width 0.3s ease',
           }} />

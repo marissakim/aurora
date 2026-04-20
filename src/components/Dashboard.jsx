@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
 import EveLogo from './ui/EveLogo';
@@ -18,12 +18,20 @@ const tabs = [
   { id: 'plan', label: 'My Plan', icon: ClipboardList },
 ];
 
-export default function Dashboard({ profile }) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [clinicsFilter, setClinicsFilter] = useState(null);
+export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers, initialDeepLink }) {
+  const [activeTab, setActiveTab] = useState(initialDeepLink?.tab || 'overview');
+  const [clinicsFilter, setClinicsFilter] = useState(initialDeepLink?.filter || null);
   // Tracks which pathway the user has committed to. Set when they complete
   // the donor-funded eligibility intake; personalizes My Plan accordingly.
   const [selectedPathway, setSelectedPathway] = useState(null);
+
+  // Honor deep-link prop on mount (e.g., from BiomarkerIntake "Browse virtual testing")
+  useEffect(() => {
+    if (initialDeepLink?.tab) setActiveTab(initialDeepLink.tab);
+    if (initialDeepLink?.filter) setClinicsFilter(initialDeepLink.filter);
+    // Intentionally only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Navigate to a tab, optionally with a pre-selected filter (e.g., deep-link
   // from the My Index "Start Here" card to Find Clinics > Virtual Care)
@@ -34,8 +42,8 @@ export default function Dashboard({ profile }) {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'overview': return <MyIndex profile={profile} onNavigate={navigate} />;
-      case 'markers': return <Biomarkers />;
+      case 'overview': return <MyIndex profile={profile} biomarkers={biomarkers} onNavigate={navigate} />;
+      case 'markers': return <Biomarkers biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onNavigate={navigate} />;
       case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;

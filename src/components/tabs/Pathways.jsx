@@ -42,9 +42,10 @@ export default function Pathways({ profile, onPathwaySelected }) {
               {i === 0 && (
                 <span style={{
                   position: 'absolute', top: -10, right: 16,
-                  background: colors.gold, color: '#fff',
+                  background: colors.spice, color: '#fff',
                   fontSize: 11, fontWeight: 700, padding: '3px 10px',
                   borderRadius: 8, textTransform: 'uppercase', letterSpacing: 0.5,
+                  boxShadow: '0 2px 8px rgba(122, 66, 50, 0.25)',
                 }}>
                   Best Fit
                 </span>

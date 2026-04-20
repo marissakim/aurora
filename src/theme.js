@@ -7,12 +7,13 @@ export const colors = {
   rose: '#D9886E',       // Terracotta
   coral: '#B8794A',      // Caramel
   gold: '#C9A961',       // Muted gold
+  spice: '#7A4232',      // Arabian spice — the pop accent color
   sage: '#8B9F7E',       // Muted sage
   teal: '#6B8F8F',       // Dusty teal
   text: '#2B2B2B',       // Warm near-black
   textLight: '#7A7574',  // Warm gray
-  border: '#E8E4DD',     // Warm cream
-  bg: '#FBF9F5',         // Warm ivory
+  border: '#DDD8CC',     // Warm cream border that reads against Cloud Dancer
+  bg: '#EDEAE0',         // Pantone Cloud Dancer — warm off-white page background
   white: '#FFFFFF',
   deepTwilight: '#1F1825', // Deep aubergine for hero backgrounds
 };
@@ -23,6 +24,9 @@ export const gradients = {
   purpleRose: 'linear-gradient(135deg, #3D2E3D, #D9886E)',
   roseGold: 'linear-gradient(135deg, #D9886E, #C9A961)',
   tealGold: 'linear-gradient(135deg, #6B8F8F, #C9A961)',
+  // Spice gradients — for pop CTAs and emphasis moments
+  spice: 'linear-gradient(135deg, #7A4232, #C9A961)',
+  spiceDeep: 'linear-gradient(135deg, #5C3126, #7A4232)',
 };
 
 export const fonts = {
