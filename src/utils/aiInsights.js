@@ -191,7 +191,7 @@ function generateSummary(profile, biomarkers, score) {
     ? ` For your egg-freezing goal, your ovarian reserve markers (AMH, AFC) are the most predictive — and both look favorable.`
     : profile.goal === 'Conceive'
       ? ` Given your goal to conceive, your cycle regularity and hormonal balance are the key levers.`
-      : profile.goal === 'In treatment'
+      : profile.goal === 'In active IVF/IUI treatment'
         ? ` Since you're already in treatment, this analysis is most useful as a second opinion on your current trajectory.`
         : ` Your combination of age and timeline gives you flexibility to optimize before committing to a pathway.`;
 

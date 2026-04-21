@@ -158,7 +158,7 @@ export function computePathwayFit(profile, pathwayId) {
     'Conceive': { natural: 85, iui: 70, ivf: 75, freeze: 30, splitFreeze: 25, donor: 45, surrogate: 25 },
     'Freeze eggs': { natural: 20, iui: 15, ivf: 40, freeze: 95, splitFreeze: 85, donor: 25, surrogate: 15 },
     'Explore options': { natural: 80, iui: 65, ivf: 70, freeze: 60, splitFreeze: 55, donor: 50, surrogate: 35 },
-    'In treatment': { natural: 40, iui: 60, ivf: 85, freeze: 50, splitFreeze: 40, donor: 55, surrogate: 40 },
+    'In active IVF/IUI treatment': { natural: 40, iui: 60, ivf: 85, freeze: 50, splitFreeze: 40, donor: 55, surrogate: 40 },
     'Donor/surrogacy': { natural: 20, iui: 30, ivf: 55, freeze: 25, splitFreeze: 30, donor: 90, surrogate: 85 },
   };
   const base = goalFits[profile.goal]?.[pathwayId] || 50;

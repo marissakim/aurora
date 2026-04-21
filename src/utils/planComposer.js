@@ -27,7 +27,7 @@ const TASKS = [
     category: 'Health',
     phase: 1,
     priority: 4,
-    when: p => ['Conceive', 'Freeze eggs', 'In treatment'].includes(p.goal),
+    when: p => ['Conceive', 'Freeze eggs', 'In active IVF/IUI treatment'].includes(p.goal),
   },
   {
     id: 'vitd',
@@ -75,7 +75,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 3,
     priority: 5,
-    when: p => p.testing !== 'Yes, plus genetic screening' && ['Freeze eggs', 'In treatment', 'Donor/surrogacy'].includes(p.goal),
+    when: p => p.testing !== 'Yes, plus genetic screening' && ['Freeze eggs', 'In active IVF/IUI treatment', 'Donor/surrogacy'].includes(p.goal),
   },
   {
     id: 'hsg',
@@ -91,7 +91,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 1,
     priority: 7,
-    when: p => p.partner === 'Yes' && ['Conceive', 'In treatment'].includes(p.goal),
+    when: p => p.partner === 'Yes' && ['Conceive', 'In active IVF/IUI treatment'].includes(p.goal),
   },
 
   // ─────────── Provider consults (depends on goal + timeline) ──────
@@ -101,7 +101,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 1,
     priority: 8,
-    when: p => ['Freeze eggs', 'In treatment', 'Donor/surrogacy'].includes(p.goal),
+    when: p => ['Freeze eggs', 'In active IVF/IUI treatment', 'Donor/surrogacy'].includes(p.goal),
   },
   {
     id: 'obgyn-preconception',
@@ -117,7 +117,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 2,
     priority: 7,
-    when: p => p.goal === 'In treatment' && p.concern === 'Success rates',
+    when: p => p.goal === 'In active IVF/IUI treatment' && p.concern === 'Success rates',
   },
   {
     id: 'virtual-consult',
@@ -291,6 +291,16 @@ const TASKS = [
     when: p => p.concern === 'Finding a doctor' || p.concern === 'Success rates',
   },
 
+  // ─────────── Consider donor eggs (40+ non-donor users) ─────────
+  {
+    id: 'evaluate-donor-eggs',
+    text: 'Take some time to think through whether donor eggs are right for you — at your age, donor cycles often deliver 50–65% live birth rates vs. much lower with own eggs. It doesn\'t have to be the answer, but it\'s worth the conversation with your RE.',
+    category: 'Health',
+    phase: 1,
+    priority: 9,
+    when: p => ['38–40', '41+'].includes(p.age) && p.goal !== 'Donor/surrogacy',
+  },
+
   // ─────────── Timeline adjustments ────────────────────────────────
   {
     id: 'urgent-consult',
@@ -342,7 +352,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 1,
     priority: 6,
-    when: p => p.goal === 'In treatment',
+    when: p => p.goal === 'In active IVF/IUI treatment',
   },
   {
     id: 'protocol-review',
@@ -350,7 +360,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 2,
     priority: 6,
-    when: p => p.goal === 'In treatment',
+    when: p => p.goal === 'In active IVF/IUI treatment',
   },
 
   // ─────────── Donor / Surrogacy pathway ─────────────────────────

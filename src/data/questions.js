@@ -32,7 +32,7 @@ export const questions = [
     section: 'Your Goal',
     question: "What's your primary goal right now?",
     key: 'goal',
-    options: ['Conceive', 'Freeze eggs', 'Explore options', 'In treatment', 'Donor/surrogacy'],
+    options: ['Conceive', 'Freeze eggs', 'Explore options', 'In active IVF/IUI treatment', 'Donor/surrogacy'],
   },
   {
     id: 6,
