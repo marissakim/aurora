@@ -20,17 +20,19 @@ const pathwayBadges = {
   },
 };
 
-export default function MyPlan({ profile = {}, selectedPathway, orderedKit, onNavigate }) {
+export default function MyPlan({ profile = {}, biomarkers = [], selectedPathway, orderedKit, onNavigate }) {
   // Store completed task IDs as an array in localStorage (Set isn't serializable).
   // Convert to a Set at use-site for fast lookups and immutable updates.
   const [completedIds, setCompletedIds] = useLocalStorage('eve:completedTasks', []);
   const completed = new Set(completedIds);
 
   // When user has committed to a specific pathway (e.g. donor-funded), use
-  // that hand-authored plan. Otherwise compose from their onboarding profile.
+  // that hand-authored plan. Otherwise compose from profile + biomarkers —
+  // the composer now reacts to specific biomarker values (e.g. low Vit D
+  // surfaces a dose-specific supplementation task).
   const plan = selectedPathway
     ? getPlanForPathway(selectedPathway)
-    : composePlan(profile);
+    : composePlan(profile, biomarkers);
   const badge = selectedPathway ? pathwayBadges[selectedPathway] : null;
   const isComposed = !selectedPathway;
 

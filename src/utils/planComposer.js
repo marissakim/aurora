@@ -35,7 +35,9 @@ const TASKS = [
     category: 'Health',
     phase: 1,
     priority: 3,
-    when: () => true,
+    // Only fires when no Vitamin D biomarker data exists. When we have
+    // a real value, the vitd-low/vitd-critical tasks below take over.
+    when: (p, b) => !findMarker(b, 'Vitamin D'),
   },
 
   // ─────────── Baseline testing (depends on testing answer) ────────
@@ -478,30 +480,194 @@ const TASKS = [
     priority: 4,
     when: () => true,
   },
+
+  // ─────────── Biomarker-aware tasks ──────────────────────────────
+  // These tasks react to actual biomarker values. Each has a `text`
+  // function that embeds the user's number, and a `when` that checks
+  // both profile AND biomarkers.
+  {
+    id: 'vitd-low',
+    text: (p, b) => {
+      const m = findMarker(b, 'Vitamin D');
+      return `Your Vitamin D of ${m.value} ${m.unit} is below the 30 ng/mL threshold. 2000–4000 IU daily for 8–12 weeks typically restores levels — retest after.`;
+    },
+    category: 'Health',
+    phase: 1,
+    priority: 8,
+    when: (p, b) => {
+      const m = findMarker(b, 'Vitamin D');
+      return m && m.value < 30 && m.value >= 20;
+    },
+  },
+  {
+    id: 'vitd-critical',
+    text: (p, b) => {
+      const m = findMarker(b, 'Vitamin D');
+      return `Vitamin D of ${m.value} ${m.unit} is in the deficient range (below 20). Ask your doctor about a short 8–12 week course of higher-dose supplementation (often 5000+ IU or weekly prescription D2).`;
+    },
+    category: 'Health',
+    phase: 1,
+    priority: 9,
+    when: (p, b) => {
+      const m = findMarker(b, 'Vitamin D');
+      return m && m.value < 20;
+    },
+  },
+  {
+    id: 'tsh-high',
+    text: (p, b) => {
+      const m = findMarker(b, 'TSH');
+      return `Your TSH of ${m.value} ${m.unit} is above the 2.5 fertility target. Ask your doctor about a low-dose levothyroxine trial — easy to manage and often improves both cycle regularity and IVF outcomes.`;
+    },
+    category: 'Appointment',
+    phase: 1,
+    priority: 8,
+    when: (p, b) => {
+      const m = findMarker(b, 'TSH');
+      return m && m.value > 2.5;
+    },
+  },
+  {
+    id: 'amh-low',
+    text: (p, b) => {
+      const m = findMarker(b, 'AMH');
+      return `AMH of ${m.value} ${m.unit} indicates diminished ovarian reserve. If you're trying to conceive, it's worth moving your timeline up — reserve typically drops 10–15% per year at this level. Also ask your RE about mini-IVF or DuoStim protocols.`;
+    },
+    category: 'Appointment',
+    phase: 1,
+    priority: 9,
+    when: (p, b) => {
+      const m = findMarker(b, 'AMH');
+      return m && m.value < 1.0 && p.goal !== 'Donor/surrogacy';
+    },
+  },
+  {
+    id: 'afc-low',
+    text: (p, b) => {
+      const m = findMarker(b, 'AFC');
+      return `An AFC of ${m.value} suggests diminished reserve. Standard IVF stimulation may under-respond — worth discussing a DOR (diminished ovarian reserve) protocol with your RE.`;
+    },
+    category: 'Appointment',
+    phase: 2,
+    priority: 8,
+    when: (p, b) => {
+      const m = findMarker(b, 'AFC');
+      return m && m.value < 7 && p.goal !== 'Donor/surrogacy';
+    },
+  },
+  {
+    id: 'lh-fsh-pcos',
+    text: (p, b) => {
+      const lh = findMarker(b, 'LH');
+      const fsh = findMarker(b, 'FSH');
+      const ratio = (lh.value / fsh.value).toFixed(1);
+      return `Your LH:FSH ratio of ${ratio}:1 is a classic biochemical PCOS signal. A full workup — total + free testosterone, fasting insulin, HbA1c, and pelvic ultrasound — will confirm and shape the right protocol.`;
+    },
+    category: 'Appointment',
+    phase: 1,
+    priority: 9,
+    when: (p, b) => {
+      const lh = findMarker(b, 'LH');
+      const fsh = findMarker(b, 'FSH');
+      return lh && fsh && fsh.value > 0 && lh.value / fsh.value >= 2;
+    },
+  },
+  {
+    id: 'prolactin-high',
+    text: (p, b) => {
+      const m = findMarker(b, 'Prolactin');
+      return `Prolactin of ${m.value} ${m.unit} is above the typical 3–25 range. A repeat draw in the morning (fasting, before exercise) usually clarifies. If it stays elevated, treatment is typically straightforward with oral cabergoline.`;
+    },
+    category: 'Appointment',
+    phase: 2,
+    priority: 7,
+    when: (p, b) => {
+      const m = findMarker(b, 'Prolactin');
+      return m && m.value > 25;
+    },
+  },
+  {
+    id: 'estradiol-high-day3',
+    text: (p, b) => {
+      const m = findMarker(b, 'Estradiol');
+      return `Day-3 Estradiol of ${m.value} ${m.unit} is elevated — this can artificially suppress FSH and mask declining reserve. Ask your RE to interpret your full Day-3 panel together, not FSH in isolation.`;
+    },
+    category: 'Appointment',
+    phase: 2,
+    priority: 7,
+    when: (p, b) => {
+      const m = findMarker(b, 'Estradiol');
+      return m && m.value > 75;
+    },
+  },
+  {
+    id: 'bmi-out-of-range',
+    text: (p, b) => {
+      const m = findMarker(b, 'BMI');
+      const direction = m.value < 18.5 ? 'below' : 'above';
+      return `Your BMI of ${m.value} is ${direction} the 18.5–24.9 fertility-optimal range. Even a 5–10% shift can restore ovulation and improve treatment outcomes — worth working with a registered dietitian rather than crash-dieting.`;
+    },
+    category: 'Health',
+    phase: 2,
+    priority: 6,
+    when: (p, b) => {
+      const m = findMarker(b, 'BMI');
+      return m && (m.value < 18.5 || m.value > 30);
+    },
+  },
+  {
+    id: 'strong-baseline',
+    text: (p, b) => {
+      const count = b.filter(x => x.status === 'good').length;
+      return `${count} of your biomarkers are in range — a strong baseline. Focus your next steps on whichever pathway fits your goals rather than on optimizing the numbers further.`;
+    },
+    category: 'Health',
+    phase: 4,
+    priority: 3,
+    when: (p, b) => {
+      if (!b || b.length < 4) return false;
+      const good = b.filter(m => m.status === 'good').length;
+      return good >= 5 && good / b.length >= 0.8;
+    },
+  },
 ];
 
 /**
- * Compose a personalized plan from a profile.
- * Returns an array of phases, each with a title and a list of tasks.
+ * Helper: find a biomarker entry by name in a list.
+ */
+function findMarker(biomarkers, name) {
+  if (!Array.isArray(biomarkers)) return null;
+  return biomarkers.find(m => m.name === name) || null;
+}
+
+/**
+ * Compose a personalized plan from a profile and biomarkers.
+ * Tasks' `when()` functions receive (profile, biomarkers); `text` may
+ * also be a function with the same signature for values that embed
+ * specific biomarker readings.
  * Caller can override with a pathway-specific plan (e.g. donor-funded).
  */
-export function composePlan(profile) {
-  // Evaluate all tasks against the profile
+export function composePlan(profile, biomarkers = []) {
   const matched = TASKS
     .filter(t => {
-      try { return t.when(profile); }
+      try { return t.when(profile, biomarkers); }
       catch { return false; }
     });
 
-  // Bucket by phase, sort within each by priority (high → low)
+  // Resolve any dynamic text to its final string once we know the task matches
+  const resolved = matched.map(t => ({
+    ...t,
+    resolvedText: typeof t.text === 'function' ? t.text(profile, biomarkers) : t.text,
+  }));
+
   const phases = [1, 2, 3, 4].map(phaseNum => ({
     num: phaseNum,
     title: ['This Week', 'Within 2 Weeks', 'This Month', 'Next 3 Months'][phaseNum - 1],
-    tasks: matched
+    tasks: resolved
       .filter(t => t.phase === phaseNum)
       .sort((a, b) => b.priority - a.priority)
-      .slice(0, 5) // cap each phase at 5 tasks to avoid overwhelm
-      .map(t => ({ id: t.id, text: t.text, category: t.category })),
+      .slice(0, 5) // cap each phase at 5 tasks
+      .map(t => ({ id: t.id, text: t.resolvedText, category: t.category })),
   }));
 
   return phases;
