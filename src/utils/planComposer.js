@@ -45,7 +45,12 @@ const TASKS = [
     category: 'Appointment',
     phase: 1,
     priority: 10,
-    when: p => p.testing === 'Not yet' && p.conditions !== 'PCOS' && p.cycles !== 'Irregular' && p.cycles !== 'Very light or absent',
+    when: p => p.testing === 'Not yet' && (
+      // Standard reproductive users without PCOS signals
+      (p.conditions !== 'PCOS' && p.cycles !== 'Irregular' && p.cycles !== 'Very light or absent')
+      // OR donor/surrogacy users — they need baseline, not a PCOS workup
+      || p.goal === 'Donor/surrogacy'
+    ),
   },
   {
     id: 'baseline-panel-pcos',

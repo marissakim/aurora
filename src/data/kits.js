@@ -34,9 +34,17 @@ export const eveKits = [
 // Returns the kit id that's best matched to the user's profile.
 // Used to show a "Recommended for you" badge in the kit modal.
 export function recommendKit(profile = {}) {
+  // Donor/surrogacy users aren't optimizing their own ovaries. Irregular
+  // cycles at 40+ is usually perimenopause, not PCOS — so the PCOS kit's
+  // androgen/insulin panel is off-target. A baseline Reproductive kit
+  // (which still includes TSH + Vitamin D for recipient prep) fits better.
+  if (profile.goal === 'Donor/surrogacy') {
+    return 'reproductive';
+  }
+  // For own-fertility users, PCOS signals warrant the broader androgen /
+  // metabolic panel that the PCOS kit provides.
   if (profile.conditions === 'PCOS' || profile.cycles === 'Irregular' || profile.cycles === 'Very light or absent') {
     return 'pcos';
   }
-  // Default: most fertility-stage users benefit from the reproductive kit
   return 'reproductive';
 }
