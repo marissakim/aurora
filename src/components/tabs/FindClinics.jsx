@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Star, MapPin, TrendingUp, DollarSign, ExternalLink, Video } from 'lucide-react';
 import { colors, cardStyle, gradients, fonts } from '../../theme';
-import { clinics } from '../../data/clinics';
+import { clinics, clinicsForLocation } from '../../data/clinics';
 import { telehealthProviders } from '../../data/telehealth';
 import { eggDonorOptions, spermDonorOptions, surrogacyAgencies } from '../../data/donorAgencies';
 
@@ -159,9 +159,37 @@ export default function FindClinics({ profile, initialFilter }) {
       )}
 
       {/* Clinic cards */}
-      {activeFilter === 'IVF Clinics' && (
+      {activeFilter === 'IVF Clinics' && (() => {
+        const userLocation = profile.location;
+        const supportedCities = ['SF Bay Area', 'LA', 'NYC'];
+        const isSupported = supportedCities.includes(userLocation);
+        const filteredClinics = clinicsForLocation(userLocation);
+        return (
+        <>
+          {!isSupported && (
+            <div style={{
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)',
+              border: `1px solid ${colors.border}`,
+              borderLeft: `3px solid ${colors.spice}`,
+              borderRadius: 10,
+              padding: '12px 16px',
+              marginBottom: 16,
+            }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>
+                We&apos;re starting with SF, LA, and NYC
+              </p>
+              <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
+                You&apos;re outside our currently-covered metros — showing all clinics below. For your area, SART.org has the most complete verified list and virtual care remains a strong first step.
+              </p>
+            </div>
+          )}
+          {isSupported && (
+            <p style={{ fontSize: 12, color: colors.textLight, margin: '0 0 12px', fontStyle: 'italic' }}>
+              Showing {filteredClinics.length} clinics in {userLocation}.
+            </p>
+          )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
-          {clinics.map(clinic => (
+          {filteredClinics.map(clinic => (
             <div key={clinic.name} style={cardStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
@@ -202,7 +230,9 @@ export default function FindClinics({ profile, initialFilter }) {
             </div>
           ))}
         </div>
-      )}
+        </>
+        );
+      })()}
 
       {activeFilter === 'Egg Donors' && (
         <>

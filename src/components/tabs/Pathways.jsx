@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
-import { colors, cardStyle, gradients } from '../../theme';
+import { Sparkles, UserPlus, Home, Stethoscope, Video, Snowflake, ArrowRight } from 'lucide-react';
+import { colors, cardStyle, gradients, fonts } from '../../theme';
 import { pathways as pathwayData } from '../../data/pathways';
 import { computePathwayFit } from '../../utils/scoring';
 import { generateAnalysis } from '../../utils/aiInsights';
 import { sampleBiomarkers } from '../../data/biomarkers';
 import DonorIntakeModal from '../DonorIntakeModal';
 
-export default function Pathways({ profile, onPathwaySelected }) {
+export default function Pathways({ profile, onPathwaySelected, onNavigate }) {
   const [expanded, setExpanded] = useState(null);
   const [showDonorIntake, setShowDonorIntake] = useState(false);
   const [reasoning, setReasoning] = useState({});
+
+  const is40Plus = ['38–40', '41+'].includes(profile?.age);
 
   const scored = pathwayData.map(p => ({
     ...p,
@@ -20,6 +22,12 @@ export default function Pathways({ profile, onPathwaySelected }) {
   useEffect(() => {
     generateAnalysis(profile, sampleBiomarkers).then(r => setReasoning(r.pathwayReasoning || {}));
   }, [profile]);
+
+  // 40+ users get a simplified, action-oriented Pathways view — the
+  // realistic decision space narrows to a handful of concrete next moves.
+  if (is40Plus) {
+    return <ActionCardsView profile={profile} onNavigate={onNavigate} />;
+  }
 
   return (
     <div>
@@ -170,6 +178,159 @@ export default function Pathways({ profile, onPathwaySelected }) {
           onSubmitted={() => onPathwaySelected?.('splitFreeze')}
         />
       )}
+    </div>
+  );
+}
+
+// Simplified 5-card action view for 40+ users. Replaces the full
+// 7-pathway comparison with action-oriented next steps — the realistic
+// decision space at this age.
+function ActionCardsView({ profile, onNavigate }) {
+  const isCommittedToDonor = profile?.goal === 'Donor/surrogacy';
+
+  // Ordering: when a user has already committed to donor/surrogacy, Find
+  // a Donor goes first. Otherwise, the donor option still leads — at 40+
+  // it's the highest-odds path for most users.
+  const actions = [
+    {
+      key: 'donor',
+      icon: <UserPlus size={22} color={colors.spice} />,
+      title: 'Find a Donor',
+      subtitle: 'Egg donor programs and banks',
+      body: 'At your age, donor cycles often deliver 50–65% live birth rates per transfer — the highest-odds path for most users.',
+      cta: 'View donor options',
+      onClick: () => onNavigate?.('clinics', { filter: 'Egg Donors' }),
+      primary: true,
+    },
+    {
+      key: 'surrogacy',
+      icon: <Home size={22} color={colors.spice} />,
+      title: 'Learn About Surrogacy',
+      subtitle: 'Gestational carrier agencies',
+      body: 'If carrying isn\'t right for you, surrogacy agencies guide the matching, legal, and medical process over 12–18 months.',
+      cta: 'View agencies',
+      onClick: () => onNavigate?.('clinics', { filter: 'Surrogacy Agencies' }),
+    },
+    {
+      key: 'doctor',
+      icon: <Stethoscope size={22} color={colors.spice} />,
+      title: 'Find a Doctor',
+      subtitle: 'Reproductive endocrinologists near you',
+      body: 'Start with a consultation to weigh all your options — own-egg IVF, donor eggs, and beyond. An RE can be your guide.',
+      cta: 'View clinics',
+      onClick: () => onNavigate?.('clinics', { filter: 'IVF Clinics' }),
+    },
+    {
+      key: 'virtual',
+      icon: <Video size={22} color={colors.spice} />,
+      title: 'Schedule a Virtual Consult',
+      subtitle: 'A lighter first step',
+      body: 'Virtual consults ($25–$250) help you understand options without a full clinic intake. Often the fastest way to get moving.',
+      cta: 'View virtual care',
+      onClick: () => onNavigate?.('clinics', { filter: 'Virtual Care' }),
+    },
+    {
+      key: 'freeze',
+      icon: <Snowflake size={22} color={colors.spice} />,
+      title: 'Freeze Eggs',
+      subtitle: 'Banking what you have',
+      body: 'At your age, cycles typically yield fewer eggs per retrieval — but some choose to bank what they can before moving to other paths.',
+      cta: 'View clinics that freeze',
+      onClick: () => onNavigate?.('clinics', { filter: 'IVF Clinics' }),
+    },
+  ];
+
+  // If user committed to donor path, already highlight the Find a Donor card
+  // in the order (it's already first, so this is just aesthetic confirmation).
+  if (isCommittedToDonor) actions[0].primary = true;
+
+  return (
+    <div>
+      <h2 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: '0 0 8px' }}>Your Pathways</h2>
+      <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px', lineHeight: 1.5 }}>
+        At your age, these are the options most worth considering. Each card takes you
+        straight to the directory or providers you need to act on it.
+      </p>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: 14,
+      }}>
+        {actions.map(action => (
+          <div
+            key={action.key}
+            onClick={action.onClick}
+            style={{
+              ...cardStyle,
+              cursor: 'pointer',
+              position: 'relative',
+              border: action.primary ? `2px solid ${colors.spice}` : cardStyle.border,
+              background: action.primary ? 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)' : '#fff',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.06)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            {action.primary && (
+              <span style={{
+                position: 'absolute', top: -10, right: 16,
+                background: colors.spice, color: '#fff',
+                fontSize: 10, fontWeight: 700, padding: '3px 10px',
+                borderRadius: 8, textTransform: 'uppercase', letterSpacing: 0.5,
+                boxShadow: '0 2px 8px rgba(122, 66, 50, 0.3)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}>
+                <Sparkles size={10} /> Top recommendation
+              </span>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: colors.bg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                {action.icon}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
+                  {action.title}
+                </h3>
+                <p style={{ fontSize: 12, fontWeight: 600, color: colors.textLight, margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                  {action.subtitle}
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 14px', lineHeight: 1.55 }}>
+              {action.body}
+            </p>
+
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              color: colors.spice, fontSize: 13, fontWeight: 600,
+              fontFamily: fonts.family,
+            }}>
+              {action.cta} <ArrowRight size={14} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{
+        fontSize: 12, color: colors.textLight, marginTop: 20,
+        fontStyle: 'italic', textAlign: 'center', lineHeight: 1.5,
+      }}>
+        These are the paths worth weighing at your age — an RE can help you think through which combination is right for you.
+      </p>
     </div>
   );
 }

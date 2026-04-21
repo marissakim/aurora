@@ -44,7 +44,7 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
     switch (activeTab) {
       case 'overview': return <MyIndex profile={profile} biomarkers={biomarkers} onNavigate={navigate} />;
       case 'markers': return <Biomarkers profile={profile} biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onNavigate={navigate} />;
-      case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} />;
+      case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} onNavigate={navigate} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;
       case 'plan': return <MyPlan profile={profile} selectedPathway={selectedPathway} onNavigate={navigate} />;
