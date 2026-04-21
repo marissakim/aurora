@@ -25,6 +25,10 @@ export default function App() {
   const [view, setView] = useState(getInitialView);
   const [profile, setProfile] = useLocalStorage('eve:profile', {});
   const [biomarkers, setBiomarkers] = useLocalStorage('eve:biomarkers', []);
+  // When a user "orders" an Eve Kit via the mock purchase flow, we store
+  // { kitId, orderedAt } so the My Plan tab can show shipping status and
+  // auto-generate follow-up tasks. null = no active order.
+  const [orderedKit, setOrderedKit] = useLocalStorage('eve:orderedKit', null);
   // When a user came in via "Browse virtual testing" from intake, deep-link
   // them straight to the Virtual Care filter on the dashboard.
   const [deepLinkClinicsToVirtualCare, setDeepLinkClinicsToVirtualCare] = useState(false);
@@ -68,6 +72,7 @@ export default function App() {
           profile={profile}
           onComplete={handleBiomarkerIntakeComplete}
           onGetTested={handleGetTestedFromIntake}
+          onKitOrdered={kit => setOrderedKit({ kitId: kit.id, kitName: kit.name, orderedAt: Date.now() })}
         />
       );
     case 'dashboard':
@@ -76,6 +81,8 @@ export default function App() {
           profile={profile}
           biomarkers={biomarkers}
           onUpdateBiomarkers={setBiomarkers}
+          orderedKit={orderedKit}
+          onKitOrdered={kit => setOrderedKit({ kitId: kit.id, kitName: kit.name, orderedAt: Date.now() })}
           onStartOver={handleStartOver}
           initialDeepLink={deepLinkClinicsToVirtualCare ? { tab: 'clinics', filter: 'Virtual Care' } : null}
         />

@@ -1,5 +1,5 @@
-import { ExternalLink, Sparkles } from 'lucide-react';
-import { colors, cardStyle, gradients } from '../../theme';
+import { ExternalLink, Sparkles, Package, CheckCircle2, Circle } from 'lucide-react';
+import { colors, cardStyle, gradients, fonts } from '../../theme';
 import { getPlanForPathway } from '../../data/plan';
 import { composePlan } from '../../utils/planComposer';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -20,7 +20,7 @@ const pathwayBadges = {
   },
 };
 
-export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
+export default function MyPlan({ profile = {}, selectedPathway, orderedKit, onNavigate }) {
   // Store completed task IDs as an array in localStorage (Set isn't serializable).
   // Convert to a Set at use-site for fast lookups and immutable updates.
   const [completedIds, setCompletedIds] = useLocalStorage('eve:completedTasks', []);
@@ -49,6 +49,9 @@ export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
       <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px' }}>
         Your personalized action plan based on your profile and goals.
       </p>
+
+      {/* Kit status — top of the plan when an order is active */}
+      {orderedKit && <KitStatusBanner orderedKit={orderedKit} />}
 
       {/* AI-personalized hint shown when plan is composed from onboarding profile */}
       {isComposed && !badge && (
@@ -210,6 +213,109 @@ export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
       <p style={{ fontSize: 13, color: colors.textLight, textAlign: 'center', marginTop: 8 }}>
         Your plan updates automatically as you log new data and check off steps.
       </p>
+    </div>
+  );
+}
+
+// ─── Kit status banner ──────────────────────────────────────────────
+// Shows an ordered-kit's shipping timeline at the top of My Plan.
+// All dates are mocked forward from orderedAt — in a real product these
+// would come from the lab partner's tracking webhook.
+function KitStatusBanner({ orderedKit }) {
+  const { kitName, orderedAt } = orderedKit;
+  const now = Date.now();
+  const daysSince = (now - orderedAt) / (1000 * 60 * 60 * 24);
+
+  // Derive a simple 4-step status from elapsed time
+  const shipped = daysSince >= 1;
+  const delivered = daysSince >= 3;
+  const sampleReturned = false; // User-triggered in a real product
+  const resultsReady = false;
+
+  const orderedDate = new Date(orderedAt);
+  const shipDate = new Date(orderedAt + 1 * 24 * 60 * 60 * 1000);
+  const arrivalDate = new Date(orderedAt + 3 * 24 * 60 * 60 * 1000);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const headline = !shipped
+    ? 'Order confirmed — ships tomorrow'
+    : !delivered
+      ? 'Your kit is on the way'
+      : 'Your kit should have arrived — ready when you are';
+
+  const steps = [
+    { label: 'Ordered', date: fmt(orderedDate), done: true },
+    { label: 'Shipped', date: fmt(shipDate), done: shipped },
+    { label: 'Delivered', date: `~${fmt(arrivalDate)}`, done: delivered },
+    { label: 'Sample mailed back', date: sampleReturned ? 'Done' : 'Your move', done: sampleReturned },
+    { label: 'Results in your dashboard', date: resultsReady ? 'Ready' : '5–7 days after mailing', done: resultsReady },
+  ];
+
+  return (
+    <div style={{
+      background: gradients.spiceDeep,
+      borderRadius: 14,
+      padding: 18,
+      marginBottom: 20,
+      color: '#fff',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: 'rgba(255,255,255,0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Package size={18} color="#fff" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{
+            fontSize: 10, fontWeight: 700, color: '#fff',
+            textTransform: 'uppercase', letterSpacing: 0.5,
+            margin: '0 0 2px', opacity: 0.85,
+          }}>
+            {kitName}
+          </p>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', margin: 0 }}>
+            {headline}
+          </h3>
+        </div>
+      </div>
+
+      <div style={{
+        background: 'rgba(255,255,255,0.12)',
+        borderRadius: 10,
+        padding: '12px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}>
+        {steps.map((step, i) => (
+          <div key={step.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {step.done ? (
+              <CheckCircle2 size={16} color="#fff" style={{ flexShrink: 0 }} />
+            ) : (
+              <Circle size={16} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
+            )}
+            <span style={{
+              fontSize: 13,
+              fontWeight: step.done ? 500 : 400,
+              color: step.done ? '#fff' : 'rgba(255,255,255,0.7)',
+              flex: 1,
+              fontFamily: fonts.family,
+            }}>
+              {step.label}
+            </span>
+            <span style={{
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.7)',
+              fontFamily: fonts.family,
+            }}>
+              {step.date}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

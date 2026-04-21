@@ -8,7 +8,7 @@ import EveKitModal from './EveKitModal';
 //   'enter'  → form to add biomarker values
 //   'tested' → educational screen with virtual care CTA
 //   'skip'   → straight to dashboard with empty biomarkers
-export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
+export default function BiomarkerIntake({ profile, onComplete, onGetTested, onKitOrdered }) {
   const [step, setStep] = useState('choose'); // choose | enter | tested
   const [values, setValues] = useState({});
   const [showExtended, setShowExtended] = useState(false);
@@ -147,7 +147,7 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
           <EveKitModal
             profile={profile}
             onClose={() => setShowKitModal(false)}
-            onOrdered={() => { /* In a real version we'd track this */ }}
+            onOrdered={kit => onKitOrdered?.(kit)}
           />
         )}
       </Shell>

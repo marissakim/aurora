@@ -19,7 +19,7 @@ const tabs = [
   { id: 'plan', label: 'My Plan', icon: ClipboardList },
 ];
 
-export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers, onStartOver, initialDeepLink }) {
+export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers, orderedKit, onKitOrdered, onStartOver, initialDeepLink }) {
   const [activeTab, setActiveTab] = useState(initialDeepLink?.tab || 'overview');
   const [clinicsFilter, setClinicsFilter] = useState(initialDeepLink?.filter || null);
   // Tracks which pathway the user has committed to. Persisted so refreshing
@@ -66,11 +66,11 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
   const renderTab = () => {
     switch (activeTab) {
       case 'overview': return <MyIndex profile={profile} biomarkers={biomarkers} onNavigate={navigate} />;
-      case 'markers': return <Biomarkers profile={profile} biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onNavigate={navigate} />;
+      case 'markers': return <Biomarkers profile={profile} biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onKitOrdered={onKitOrdered} onNavigate={navigate} />;
       case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} onNavigate={navigate} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;
-      case 'plan': return <MyPlan profile={profile} selectedPathway={selectedPathway} onNavigate={navigate} />;
+      case 'plan': return <MyPlan profile={profile} selectedPathway={selectedPathway} orderedKit={orderedKit} onNavigate={navigate} />;
       default: return null;
     }
   };

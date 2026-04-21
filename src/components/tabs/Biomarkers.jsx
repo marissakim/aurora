@@ -152,7 +152,7 @@ function EmptyBiomarkers({ onAdd, onOrderKit }) {
   );
 }
 
-export default function Biomarkers({ profile = {}, biomarkers = [], onUpdateBiomarkers, onNavigate }) {
+export default function Biomarkers({ profile = {}, biomarkers = [], onUpdateBiomarkers, onKitOrdered, onNavigate }) {
   const [expanded, setExpanded] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showKitModal, setShowKitModal] = useState(false);
@@ -196,6 +196,7 @@ export default function Biomarkers({ profile = {}, biomarkers = [], onUpdateBiom
           <EveKitModal
             profile={profile}
             onClose={() => setShowKitModal(false)}
+            onOrdered={kit => onKitOrdered?.(kit)}
           />
         )}
       </div>
@@ -347,6 +348,7 @@ export default function Biomarkers({ profile = {}, biomarkers = [], onUpdateBiom
         <EveKitModal
           profile={profile}
           onClose={() => setShowKitModal(false)}
+          onOrdered={kit => onKitOrdered?.(kit)}
         />
       )}
     </div>
