@@ -59,8 +59,10 @@ export default {
       return json({ error: 'Missing profile' }, 400, corsHeaders);
     }
 
-    // Cache lookup — deterministic key from canonicalized inputs
-    const cacheKey = 'resp:' + (await hashPayload({ profile, biomarkers: biomarkers || [] }));
+    // Cache lookup — deterministic key from canonicalized inputs.
+    // Prefix 'resp:v2:' to invalidate v1 entries (which had a hashing bug
+    // that caused all profiles to hash identically).
+    const cacheKey = 'resp:v2:' + (await hashPayload({ profile, biomarkers: biomarkers || [] }));
     try {
       const cached = await env.CACHE.get(cacheKey);
       if (cached) {
@@ -178,11 +180,31 @@ function json(body, status = 200, extraHeaders = {}) {
 }
 
 /**
+ * Recursively sort object keys so two profiles with the same content but
+ * different key insertion order hash identically. Arrays preserve order
+ * (since order is meaningful for biomarkers).
+ */
+function deepCanonicalize(value) {
+  if (value === null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(deepCanonicalize);
+  const sortedKeys = Object.keys(value).sort();
+  const out = {};
+  for (const k of sortedKeys) out[k] = deepCanonicalize(value[k]);
+  return out;
+}
+
+/**
  * Stable SHA-256 hash of a canonicalized payload, used as the cache key.
- * Canonical = JSON-stringified with sorted keys so {a,b} and {b,a} hash equally.
+ *
+ * Earlier version used JSON.stringify(obj, Object.keys(obj).sort()) — but
+ * the second arg there is a property *filter* (only top-level keys passed
+ * through), so all nested keys (age, goal, etc.) were dropped. That caused
+ * every distinct profile to hash to the same key and serve a single cached
+ * response to all users. Bumping the prefix ('resp:v2:') abandons any
+ * poisoned entries from the broken version.
  */
 async function hashPayload(obj) {
-  const canonical = JSON.stringify(obj, Object.keys(obj).sort());
+  const canonical = JSON.stringify(deepCanonicalize(obj));
   const encoder = new TextEncoder();
   const hash = await crypto.subtle.digest('SHA-256', encoder.encode(canonical));
   return Array.from(new Uint8Array(hash))

@@ -13,12 +13,6 @@ const quickActions = [
   { label: 'Cost Estimator', icon: DollarSign, tab: 'costs' },
 ];
 
-const nextSteps = [
-  { text: 'Start Vitamin D supplementation (2000 IU daily)', due: 'This week' },
-  { text: 'Book consultation with top-rated RE in your area', due: 'Within 2 weeks' },
-  { text: 'Review and compare IVF clinic costs', due: 'This month' },
-];
-
 const insightTheme = {
   positive: { icon: TrendingUp, bg: '#E8F5E9', color: '#2E7D32' },
   warning: { icon: AlertCircle, bg: '#FFF3E0', color: '#E0901A' },
@@ -390,36 +384,6 @@ export default function MyIndex({ profile, biomarkers = [], onNavigate }) {
             );
           })
         )}
-      </div>
-
-      {/* Next Steps */}
-      <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: '0 0 12px' }}>Next Steps</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-        {nextSteps.map((step, i) => (
-          <div key={i} style={{
-            ...cardStyle,
-            background: gradients.spiceDeep,
-            border: 'none',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 24, height: 24, borderRadius: 6,
-                border: '2px solid rgba(255,255,255,0.5)',
-                flexShrink: 0,
-              }} />
-              <p style={{ fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>{step.text}</p>
-            </div>
-            <span style={{
-              fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)',
-              whiteSpace: 'nowrap', marginLeft: 12,
-            }}>
-              {step.due}
-            </span>
-          </div>
-        ))}
       </div>
 
       {/* Disclaimer */}
