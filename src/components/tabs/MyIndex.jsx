@@ -195,7 +195,16 @@ export default function MyIndex({ profile, biomarkers = [], onNavigate }) {
               ? `Based on your profile and ${biomarkers.length} biomarker${biomarkers.length === 1 ? '' : 's'}`
               : 'Based on your profile so far'}
           </p>
-          {!hasBiomarkers && (
+          {profile.goal === 'Donor/surrogacy' && (
+            <p style={{
+              fontSize: 12, color: colors.textLight, margin: '10px 0 0',
+              textAlign: 'center', fontStyle: 'italic', lineHeight: 1.5,
+              maxWidth: 280,
+            }}>
+              This reflects your baseline reproductive health. For a donor-egg path, your uterine health and thyroid matter more than your score suggests.
+            </p>
+          )}
+          {!hasBiomarkers && profile.goal !== 'Donor/surrogacy' && (
             <button
               onClick={() => onNavigate?.('markers')}
               style={{

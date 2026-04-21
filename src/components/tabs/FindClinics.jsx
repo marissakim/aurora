@@ -3,6 +3,7 @@ import { Search, Star, MapPin, TrendingUp, DollarSign, ExternalLink, Video } fro
 import { colors, cardStyle, gradients, fonts } from '../../theme';
 import { clinics } from '../../data/clinics';
 import { telehealthProviders } from '../../data/telehealth';
+import { eggDonorOptions, spermDonorOptions, surrogacyAgencies } from '../../data/donorAgencies';
 
 const filters = ['Virtual Care', 'IVF Clinics', 'Egg Donors', 'Surrogacy Agencies'];
 
@@ -203,48 +204,173 @@ export default function FindClinics({ profile, initialFilter }) {
         </div>
       )}
 
-      {(activeFilter === 'Egg Donors' || activeFilter === 'Surrogacy Agencies') && (
-        <div style={{ ...cardStyle, textAlign: 'center', padding: 40 }}>
-          <p style={{ fontSize: 16, color: colors.textLight, margin: 0 }}>
-            {activeFilter === 'Egg Donors' ? 'Donor database coming in V2.' : 'Surrogacy agency directory coming in V2.'}
-          </p>
+      {activeFilter === 'Egg Donors' && (
+        <>
+          <SectionExplainer
+            color={colors.spice}
+            title="Two models for donor eggs"
+            text={<>Most donor-egg journeys fall into <strong>fresh/matched</strong> (pick a donor, synchronize cycles) or <strong>frozen bank</strong> (purchase a cohort that&apos;s ready now). Matched is more personalized and typically more expensive; frozen is faster and lower cost.</>}
+          />
+          <DirectorySection title="Egg Donor Programs" items={eggDonorOptions} />
+          <DirectorySection title="Sperm Donor Banks" items={spermDonorOptions} compact />
+        </>
+      )}
+
+      {activeFilter === 'Surrogacy Agencies' && (
+        <>
+          <SectionExplainer
+            color={colors.teal}
+            title="State law matters more than agency choice"
+            text={<>Only ~15 US states have clear surrogacy-friendly statutes. Most agencies can work across state lines but it changes timelines and cost. A reproductive lawyer consult (~$300–$500) before signing with an agency can prevent expensive re-matching.</>}
+          />
+          <DirectorySection title="Full-Service Surrogacy Agencies" items={surrogacyAgencies} surrogacy />
+        </>
+      )}
+
+      {/* Cross-nav cards — only show on tabs OTHER than what they point to */}
+      {activeFilter !== 'Egg Donors' && (
+        <div
+          onClick={() => setActiveFilter('Egg Donors')}
+          style={{
+            borderRadius: 14, padding: 20, marginBottom: 16,
+            background: gradients.spiceDeep,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            cursor: 'pointer',
+          }}>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>Explore Egg Donor Programs</h3>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0 }}>Cofertility, Fairfax EggBank, Donor Egg Bank USA, and more.</p>
+          </div>
+          <div style={{
+            background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
+            padding: '8px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+          }}>
+            View →
+          </div>
         </div>
       )}
 
-      {/* Donor CTA */}
-      <div style={{
-        borderRadius: 14, padding: 24, marginBottom: 16,
-        background: gradients.spiceDeep,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
-        <div>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Explore Donors</h3>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0 }}>Browse egg and sperm donor profiles.</p>
+      {activeFilter !== 'Surrogacy Agencies' && (
+        <div
+          onClick={() => setActiveFilter('Surrogacy Agencies')}
+          style={{
+            borderRadius: 14, padding: 20,
+            background: gradients.tealGold,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            cursor: 'pointer',
+          }}>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>Explore Surrogacy Agencies</h3>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0 }}>Circle Surrogacy, ConceiveAbilities, Growing Generations, and more.</p>
+          </div>
+          <div style={{
+            background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
+            padding: '8px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+          }}>
+            View →
+          </div>
         </div>
-        <button style={{
-          background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
-          padding: '10px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-        }}>
-          Coming Soon
-        </button>
-      </div>
+      )}
+    </div>
+  );
+}
 
-      {/* Surrogacy CTA */}
-      <div style={{
-        borderRadius: 14, padding: 24,
-        background: gradients.tealGold,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+// ─── Section explainer banner (donor vs frozen, state law, etc) ──────
+function SectionExplainer({ color, title, text }) {
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)',
+      border: `1px solid ${colors.border}`,
+      borderLeft: `3px solid ${color}`,
+      borderRadius: 10,
+      padding: '12px 16px',
+      marginBottom: 16,
+    }}>
+      <p style={{ fontSize: 13, fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>{title}</p>
+      <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>{text}</p>
+    </div>
+  );
+}
+
+// ─── Directory of donor/surrogacy providers, rendered as cards ──────
+function DirectorySection({ title, items, compact, surrogacy }) {
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <h3 style={{
+        fontSize: 14, fontWeight: 700, color: colors.text,
+        textTransform: 'uppercase', letterSpacing: 0.5,
+        margin: '8px 0 12px',
       }}>
-        <div>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Explore Surrogacy</h3>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0 }}>Connect with surrogacy agencies.</p>
-        </div>
-        <button style={{
-          background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
-          padding: '10px 20px', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-        }}>
-          Coming Soon
-        </button>
+        {title}
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {items.map(item => (
+          <div key={item.name} style={cardStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 12, flex: 1, minWidth: 0 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10,
+                  background: colors.bg,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, flexShrink: 0,
+                }}>
+                  {item.icon}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: '0 0 2px' }}>
+                    {item.name}
+                  </h4>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: colors.spice, margin: 0 }}>
+                    {item.tagline}
+                  </p>
+                </div>
+              </div>
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: colors.spice,
+                  color: '#FBF9F5',
+                  border: 'none',
+                  padding: '7px 14px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Visit Site <ExternalLink size={12} />
+              </a>
+            </div>
+
+            {!compact && (
+              <p style={{ fontSize: 13, color: colors.text, margin: '10px 0', lineHeight: 1.5 }}>
+                {item.description}
+              </p>
+            )}
+
+            <div style={{
+              display: 'flex', gap: 16, flexWrap: 'wrap',
+              fontSize: 12, color: colors.textLight,
+              marginTop: compact ? 10 : 8,
+            }}>
+              {item.model && <span>{item.model}</span>}
+              {item.costRange && <span>💳 {item.costRange}</span>}
+              {item.timeline && <span>⏱ {item.timeline}</span>}
+            </div>
+            {item.specialty && (
+              <p style={{
+                fontSize: 12, color: colors.textLight, margin: '6px 0 0',
+                fontStyle: 'italic',
+              }}>
+                Best for: {item.specialty}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

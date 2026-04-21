@@ -51,8 +51,17 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
         <Eyebrow>Step 2 of 2 · Optional</Eyebrow>
         <Headline>Want to add your test results?</Headline>
         <Subhead>
-          Adding your biomarkers lets Eve give you more personalized insights and a sharper plan.
-          Don&apos;t have results yet? That&apos;s totally normal — we can help you find testing too.
+          {profile?.goal === 'Donor/surrogacy' ? (
+            <>
+              Your own reproductive hormones matter less on this path, but a few numbers still shape your journey —
+              especially your thyroid, Vitamin D, and BMI for implantation, and uterine evaluation for recipient cycles.
+            </>
+          ) : (
+            <>
+              Adding your biomarkers lets Eve give you more personalized insights and a sharper plan.
+              Don&apos;t have results yet? That&apos;s totally normal — we can help you find testing too.
+            </>
+          )}
         </Subhead>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 480 }}>

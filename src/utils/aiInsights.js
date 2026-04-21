@@ -150,6 +150,24 @@ function profileInsight(profile) {
     });
   }
 
+  // Donor/surrogacy-specific insights — reset expectations vs own-fertility framing
+  if (profile.goal === 'Donor/surrogacy') {
+    if (profile.age === '38–40' || profile.age === '41+') {
+      out.push({
+        type: 'positive',
+        title: 'Donor eggs reset your age-based odds',
+        text: 'Donor-egg IVF at your age typically sees 50–65% live birth rates per transfer — comparable to women in their 20s using their own eggs. The egg is the dominant variable for success, not the age of the recipient. Your uterus, thyroid, and overall health matter much more here than ovarian reserve.',
+        priority: 10,
+      });
+    }
+    out.push({
+      type: 'data',
+      title: 'State law shapes surrogacy more than biology',
+      text: 'Only ~15 US states have clear surrogacy-friendly statutes. A consult with a reproductive lawyer in your state (or one willing to work cross-state) is often the most important step before signing with an agency — it can save 6+ months of misdirected effort.',
+      priority: 9,
+    });
+  }
+
   return out;
 }
 
@@ -199,6 +217,14 @@ function generateWelcomeSummary(profile) {
 function generatePathwayReasoning(profile, biomarkers) {
   const amh = biomarkers.find(m => m.name === 'AMH');
   const vitD = biomarkers.find(m => m.name === 'Vitamin D');
+  const isDonorPath = profile.goal === 'Donor/surrogacy';
+  // Donor path users see context-rich reasoning for donor/surrogate pathways
+  const donorReasoning = isDonorPath
+    ? `At your age and goal, donor eggs typically deliver 50–65% live birth rates per transfer — comparable to women in their 20s using their own eggs. Choose between fresh/matched (personalized, higher cost) or frozen bank (faster, lower cost).`
+    : `Donor eggs are typically considered when ovarian reserve is severely diminished or after repeated IVF failure.`;
+  const surrogateReasoning = isDonorPath
+    ? `Gestational surrogacy pairs well with donor eggs when carrying isn't medically advised or preferred. Budget $100K–$200K+ and 12–18 months. State law is the biggest variable — a reproductive lawyer consult is step one.`
+    : `Gestational surrogacy is most commonly chosen for medical inability to carry, not as a first-line option. Legal and logistical complexity is significant.`;
   // Empty-biomarker fallback — reasoning is profile-only, no numerical references
   if (!amh) {
     return {
@@ -207,8 +233,8 @@ function generatePathwayReasoning(profile, biomarkers) {
       ivf: `IVF tends to offer the highest per-cycle success rate — but the right protocol depends heavily on your ovarian reserve markers (AMH, AFC), which we don't have yet.`,
       freeze: `Egg freezing is time-sensitive. A baseline AMH and AFC will tell you how many cycles you'd likely need at your age.`,
       splitFreeze: `Donor-funded freezing could match the quality of a self-pay cycle at $0 out of pocket, if you meet the agency's eligibility criteria (typically age 21–32, good health).`,
-      donor: `Donor eggs are typically considered when ovarian reserve is severely diminished or after repeated IVF failure.`,
-      surrogate: `Gestational surrogacy is most commonly chosen for medical inability to carry, not as a first-line option.`,
+      donor: donorReasoning,
+      surrogate: surrogateReasoning,
     };
   }
 
@@ -218,8 +244,8 @@ function generatePathwayReasoning(profile, biomarkers) {
     ivf: `Your AMH of ${amh?.value} ${amh?.unit} predicts a strong stimulation response (~12+ mature eggs per cycle). IVF offers the highest success per cycle for your profile.${vitD?.status === 'critical' ? ' Consider addressing Vitamin D before starting.' : ''}`,
     freeze: `Egg freezing is time-sensitive. At your age, freezing within the next 6 months yields meaningfully better outcomes than waiting 2 years.`,
     splitFreeze: `Donor-funded freezing could match the quality of a self-pay cycle at $0 out of pocket, if you meet the agency's eligibility criteria (typically age 21–32, good health).`,
-    donor: `Donor eggs are typically recommended when ovarian reserve is severely diminished or after repeated IVF failure. Your markers don't indicate this is necessary yet.`,
-    surrogate: `Gestational surrogacy is most commonly chosen for medical inability to carry, not as a first-line option. Legal and logistical complexity is significant.`,
+    donor: donorReasoning,
+    surrogate: surrogateReasoning,
   };
 }
 

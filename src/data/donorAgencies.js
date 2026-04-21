@@ -1,0 +1,122 @@
+// Real egg banks, sperm banks, and surrogacy agencies. Details are
+// approximate — always verify on the agency's own site before engaging.
+// Organized by section so the Find Clinics tab can filter appropriately.
+
+export const eggDonorOptions = [
+  {
+    name: 'Cofertility — Family by Co',
+    url: 'https://cofertility.com',
+    tagline: 'Human-led, clinic-agnostic donor matching',
+    description: 'Matches intended parents with donors who receive free egg freezing in exchange. Open-identity model, no sunk cost on frozen eggs that may not match your preferences.',
+    model: 'Fresh · Matched',
+    costRange: '$25K–$40K + clinic fees',
+    specialty: 'LGBTQ+ friendly, open-ID, ethical donor model',
+    icon: '\uD83D\uDC9D',
+  },
+  {
+    name: 'Fairfax EggBank',
+    url: 'https://fairfaxeggbank.com',
+    tagline: 'Largest US frozen egg bank',
+    description: 'Nationwide bank of frozen donor eggs with an extensive searchable database. Fast timeline — you can purchase cohorts and ship to your clinic.',
+    model: 'Frozen · Bank',
+    costRange: '$20K–$30K for 6–8 egg cohort',
+    specialty: 'Rapid start, anonymous donors, wide ethnic diversity',
+    icon: '\u2744\uFE0F',
+  },
+  {
+    name: 'Donor Egg Bank USA',
+    url: 'https://donoreggbankusa.com',
+    tagline: 'Network of clinics with shared frozen donor database',
+    description: 'A cooperative of 30+ clinics that share a frozen donor egg inventory. Includes a guaranteed refund program if no live birth after 2 transfers.',
+    model: 'Frozen · Network',
+    costRange: '$18K–$28K, refund plans available',
+    specialty: 'Refund guarantees, integrated with your clinic',
+    icon: '\uD83C\uDFE5',
+  },
+  {
+    name: 'ReproTech',
+    url: 'https://reprotech.com',
+    tagline: 'Established egg, sperm, and embryo cryobank',
+    description: 'Long-standing cryobank with a national donor egg program and long-term storage options. Good choice if you want to bank extra cycles.',
+    model: 'Frozen · Bank',
+    costRange: '$17K–$25K per cohort',
+    specialty: 'Long-term storage, embryo banking, established reputation',
+    icon: '\uD83E\uDDEA',
+  },
+];
+
+export const spermDonorOptions = [
+  {
+    name: 'Seattle Sperm Bank',
+    url: 'https://seattlespermbank.com',
+    tagline: 'Highly rigorous screening, open-ID available',
+    description: 'One of the most stringent screening processes in the industry. Free shipping, extensive donor profiles, and LGBTQ+ friendly.',
+    model: 'Frozen · Bank',
+    costRange: '$650–$1,200 per vial',
+    specialty: 'Open-ID donors, extensive profiles, LGBTQ+ inclusive',
+    icon: '\uD83E\uDDEC',
+  },
+  {
+    name: 'California Cryobank',
+    url: 'https://cryobank.com',
+    tagline: 'Largest US sperm bank by volume',
+    description: 'Massive donor selection, childhood photos available, and a proprietary donor-matching service. Industry standard for many fertility clinics.',
+    model: 'Frozen · Bank',
+    costRange: '$700–$1,300 per vial',
+    specialty: 'Largest selection, photo matching, genetic screening',
+    icon: '\uD83D\uDD2C',
+  },
+  {
+    name: 'Fairfax Cryobank',
+    url: 'https://fairfaxcryobank.com',
+    tagline: 'Extensive medical history, 20+ year record',
+    description: 'Sister operation to Fairfax EggBank. Known for deep donor medical histories and rigorous genetic screening.',
+    model: 'Frozen · Bank',
+    costRange: '$650–$1,100 per vial',
+    specialty: 'Deep medical histories, genetic testing included',
+    icon: '\uD83E\uDDEA',
+  },
+];
+
+export const surrogacyAgencies = [
+  {
+    name: 'Circle Surrogacy',
+    url: 'https://circlesurrogacy.com',
+    tagline: 'International, established, LGBTQ+ led',
+    description: 'One of the largest and most experienced agencies. Full-service from matching through delivery, with international intended-parent support.',
+    costRange: '$150K–$220K total',
+    timeline: '14–18 months avg to delivery',
+    specialty: 'International IPs, LGBTQ+ owned, end-to-end',
+    icon: '\uD83C\uDF10',
+  },
+  {
+    name: 'ConceiveAbilities',
+    url: 'https://conceiveabilities.com',
+    tagline: 'US-focused, structured matching process',
+    description: 'Known for detailed psychological matching between intended parents and gestational carriers. Strong legal and case management support.',
+    costRange: '$140K–$200K total',
+    timeline: '12–16 months avg',
+    specialty: 'Deep matching, case management, legal support',
+    icon: '\uD83E\uDD1D',
+  },
+  {
+    name: 'Growing Generations',
+    url: 'https://growinggenerations.com',
+    tagline: 'Premium full-service, LGBTQ+ leader',
+    description: 'Higher-touch agency with deep LGBTQ+ expertise. All-inclusive pricing model and robust carrier screening. Often recommended for complex international cases.',
+    costRange: '$170K–$250K total',
+    timeline: '12–16 months avg',
+    specialty: 'LGBTQ+, international, all-inclusive pricing',
+    icon: '\uD83C\uDFE1',
+  },
+  {
+    name: 'Bright Futures Families',
+    url: 'https://brightfuturesfamilies.com',
+    tagline: 'Agency with transparent pricing',
+    description: 'Smaller full-service agency with a reputation for transparency on fees and carrier compensation. Good fit if you want high-touch without the premium.',
+    costRange: '$130K–$180K total',
+    timeline: '10–15 months avg',
+    specialty: 'Transparent fees, responsive case management',
+    icon: '\u2728',
+  },
+];

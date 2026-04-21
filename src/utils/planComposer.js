@@ -18,7 +18,8 @@ const TASKS = [
     category: 'Health',
     phase: 1,
     priority: 5,
-    when: p => p.goal !== 'Donor/surrogacy',
+    // Still relevant for donor-egg recipients who will carry the pregnancy
+    when: () => true,
   },
   {
     id: 'coq10',
@@ -52,7 +53,7 @@ const TASKS = [
     category: 'Appointment',
     phase: 1,
     priority: 10,
-    when: p => p.testing === 'Not yet' && (p.conditions === 'PCOS' || p.cycles === 'Irregular' || p.cycles === 'Very light or absent'),
+    when: p => p.testing === 'Not yet' && (p.conditions === 'PCOS' || p.cycles === 'Irregular' || p.cycles === 'Very light or absent') && p.goal !== 'Donor/surrogacy',
   },
   {
     id: 'extended-panel',
@@ -60,7 +61,8 @@ const TASKS = [
     category: 'Appointment',
     phase: 2,
     priority: 6,
-    when: p => p.testing === 'Yes, basic bloodwork',
+    // Less relevant for donor-egg users — their own reproductive hormones matter less
+    when: p => p.testing === 'Yes, basic bloodwork' && p.goal !== 'Donor/surrogacy',
   },
   {
     id: 'genetic-screen',
@@ -170,7 +172,8 @@ const TASKS = [
     category: 'Appointment',
     phase: 2,
     priority: 8,
-    when: p => p.conditions === 'Low ovarian reserve',
+    // Not relevant if the user is pursuing donor eggs
+    when: p => p.conditions === 'Low ovarian reserve' && p.goal !== 'Donor/surrogacy',
   },
 
   // ─────────── Partner structure ───────────────────────────────────
@@ -343,6 +346,96 @@ const TASKS = [
     phase: 2,
     priority: 6,
     when: p => p.goal === 'In treatment',
+  },
+
+  // ─────────── Donor / Surrogacy pathway ─────────────────────────
+  {
+    id: 'donor-state-law',
+    text: 'Check your state\'s laws around donor conception and surrogacy — only ~15 states have clear surrogacy-friendly statutes, and it shapes every downstream decision',
+    category: 'Legal',
+    phase: 1,
+    priority: 10,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-agency-research',
+    text: 'Research 2–3 donor egg banks (Cofertility, Fairfax EggBank, Donor Egg Bank USA) — each has a different model (fresh vs frozen, matched vs bank, anonymous vs open)',
+    category: 'Appointment',
+    phase: 1,
+    priority: 9,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-recipient-workup',
+    text: 'Schedule a recipient medical workup: uterine ultrasound, saline sonogram, and endometrial biopsy if indicated. Your uterus, not your ovaries, is what matters most for this path',
+    category: 'Appointment',
+    phase: 2,
+    priority: 9,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-legal-consult',
+    text: 'Book a consult with a reproductive lawyer in your state — donor contracts and pre-birth orders are nuanced, and getting this right up front prevents costly issues later',
+    category: 'Legal',
+    phase: 2,
+    priority: 9,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-psych-eval',
+    text: 'Complete a psychological counseling session — most donor and surrogacy programs require it, and it\'s genuinely helpful for thinking through the emotional territory',
+    category: 'Health',
+    phase: 2,
+    priority: 7,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-selection-criteria',
+    text: 'Define your donor criteria: physical traits, education, CMV status, anonymous vs open-identity, medical history depth. Many programs let you filter by these upfront',
+    category: 'Appointment',
+    phase: 3,
+    priority: 7,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-genetic-counseling',
+    text: 'Meet with a genetic counselor before selecting a donor — they\'ll help you interpret donor genetic screening and flag any compatibility issues with your own carrier status',
+    category: 'Appointment',
+    phase: 3,
+    priority: 7,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'surrogacy-agency',
+    text: 'If using a gestational carrier, start the agency application early — match timelines run 3–12 months. Circle Surrogacy, ConceiveAbilities, and Growing Generations are established options',
+    category: 'Appointment',
+    phase: 2,
+    priority: 8,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-financial-reality',
+    text: 'Plan your financial runway — donor egg cycles run $20–45K and surrogacy runs $100–200K+. Most insurance excludes both, so early financing or savings planning pays off',
+    category: 'Financial',
+    phase: 1,
+    priority: 9,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-family-conversation',
+    text: 'Consider when and how you\'ll tell your family (and any future children). The Donor Conception Network has excellent resources on age-appropriate conversations',
+    category: 'Health',
+    phase: 4,
+    priority: 5,
+    when: p => p.goal === 'Donor/surrogacy',
+  },
+  {
+    id: 'donor-insurance-exclusions',
+    text: 'Call your insurance specifically to ask about donor cycle and surrogacy coverage — these are almost always excluded, but confirming it helps you plan',
+    category: 'Financial',
+    phase: 2,
+    priority: 6,
+    when: p => p.goal === 'Donor/surrogacy' && p.insurance !== 'No',
   },
 
   // ─────────── Lifestyle (long-game) ──────────────────────────────
