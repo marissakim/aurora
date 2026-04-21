@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp, AlertCircle, Sparkles, RefreshCw, Video, ArrowRight } from 'lucide-react';
-import { colors, gradients, cardStyle } from '../../theme';
-import { computeEveScore, computeDimensions, getScoreLabel } from '../../utils/scoring';
+import { FlaskConical, GitCompare, MapPin, DollarSign, Zap, Calendar, TrendingUp, AlertCircle, Sparkles, RefreshCw, Video, ArrowRight, Plus } from 'lucide-react';
+import { colors, gradients, cardStyle, fonts } from '../../theme';
+import { computeEveScore, computeScoreFactors, getScoreLabel } from '../../utils/scoring';
 import { generateAnalysis } from '../../utils/aiInsights';
 import ProgressRing from '../ui/ProgressRing';
 import Card from '../ui/Card';
@@ -27,6 +26,126 @@ const insightTheme = {
   data: { icon: Calendar, bg: '#E0F2F1', color: '#6B8F8F' },
 };
 
+// Horizontal-bar breakdown of factors contributing to the Eve Score.
+// Replaces the old radar chart — more honest (every factor is driven by
+// real input), more scannable, and naturally accommodates biomarkers
+// as they're added.
+function ScoreBreakdown({ factors, hasBiomarkers, onAddBiomarkers }) {
+  const profileFactors = factors.filter(f => f.source === 'profile');
+  const biomarkerFactors = factors.filter(f => f.source === 'biomarker');
+
+  const barColor = score => {
+    if (score >= 75) return colors.sage;
+    if (score >= 55) return colors.gold;
+    return colors.spice;
+  };
+
+  return (
+    <Card style={{ padding: 22 }}>
+      <p style={{ fontSize: 13, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 4px' }}>
+        What&apos;s driving your score
+      </p>
+      <p style={{ fontSize: 12, color: colors.textLight, margin: '0 0 16px' }}>
+        Each factor is weighted and combined — your score moves as any of these change.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {profileFactors.map(f => (
+          <FactorRow key={f.key} factor={f} barColor={barColor(f.score)} />
+        ))}
+
+        {biomarkerFactors.length > 0 && (
+          <>
+            <div style={{
+              height: 1, background: colors.border, margin: '6px 0 2px',
+            }} />
+            <p style={{
+              fontSize: 11, fontWeight: 700, color: colors.textLight,
+              textTransform: 'uppercase', letterSpacing: 0.5, margin: 0,
+            }}>
+              From your biomarkers
+            </p>
+            {biomarkerFactors.map(f => (
+              <FactorRow key={f.key} factor={f} barColor={barColor(f.score)} />
+            ))}
+          </>
+        )}
+
+        {!hasBiomarkers && (
+          <div style={{
+            background: colors.bg,
+            borderRadius: 10,
+            padding: '12px 14px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 12, marginTop: 4,
+          }}>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: colors.text, margin: '0 0 2px' }}>
+                Biomarkers — not yet added
+              </p>
+              <p style={{ fontSize: 12, color: colors.textLight, margin: 0, lineHeight: 1.4 }}>
+                Adding them typically shifts your score by ±10 points.
+              </p>
+            </div>
+            <button
+              onClick={onAddBiomarkers}
+              style={{
+                background: colors.spice,
+                color: '#FBF9F5',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: fonts.family,
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Plus size={12} /> Add
+            </button>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function FactorRow({ factor, barColor }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'baseline', minWidth: 0 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{factor.label}</span>
+          <span style={{ fontSize: 12, color: colors.textLight, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            · {factor.value}
+          </span>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 700, color: colors.text, flexShrink: 0, marginLeft: 8 }}>
+          {factor.score}
+        </span>
+      </div>
+      <div style={{
+        height: 6, background: colors.border, borderRadius: 3, overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%',
+          width: `${factor.score}%`,
+          background: barColor,
+          borderRadius: 3,
+          transition: 'width 0.5s ease-out',
+        }} />
+      </div>
+      {factor.note && (
+        <p style={{ fontSize: 11, color: colors.textLight, margin: '4px 0 0', lineHeight: 1.4 }}>
+          {factor.note}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Shimmer({ width = '100%', height = 16, style = {} }) {
   return (
     <div style={{
@@ -42,8 +161,7 @@ function Shimmer({ width = '100%', height = 16, style = {} }) {
 export default function MyIndex({ profile, biomarkers = [], onNavigate }) {
   const score = computeEveScore(profile);
   const scoreLabel = getScoreLabel(score);
-  const dims = computeDimensions(profile);
-  const radarData = Object.entries(dims).map(([dim, val]) => ({ dimension: dim, value: val, fullMark: 100 }));
+  const factors = computeScoreFactors(profile, biomarkers);
   const hasBiomarkers = biomarkers.length > 0;
 
   const [analysis, setAnalysis] = useState(null);
@@ -98,19 +216,11 @@ export default function MyIndex({ profile, biomarkers = [], onNavigate }) {
           )}
         </Card>
 
-        <Card style={{ padding: 16 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px', textAlign: 'center' }}>
-            Health Dimensions
-          </p>
-          <ResponsiveContainer width="100%" height={220}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke={colors.border} />
-              <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 10, fill: colors.textLight }} />
-              <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar dataKey="value" stroke={colors.plum} fill={colors.plum} fillOpacity={0.15} strokeWidth={2} />
-            </RadarChart>
-          </ResponsiveContainer>
-        </Card>
+        <ScoreBreakdown
+          factors={factors}
+          hasBiomarkers={hasBiomarkers}
+          onAddBiomarkers={() => onNavigate?.('markers')}
+        />
       </div>
 
       {/* Eve Analysis (AI) */}

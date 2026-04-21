@@ -44,6 +44,115 @@ export function getScoreLabel(score) {
   return 'Poor';
 }
 
+// Short, user-facing explanation for each factor value.
+// Keeps the score honest ("here's what your answer actually means") and
+// avoids the decorative-dashboard feel of the old radar chart.
+const factorNotes = {
+  age: {
+    'Under 30': 'Peak fertility years — your biggest asset',
+    '30–34': 'Still strong ovarian reserve on average',
+    '35–37': 'Reserve starts to decline — often a good window to plan',
+    '38–40': 'Reserve and egg quality drop faster here',
+    '41+': 'Meaningful decline — time is your most important variable',
+  },
+  cycles: {
+    'Regular (24–35 days)': 'A strong signal of regular ovulation',
+    'Irregular': 'Worth investigating — often points to treatable causes',
+    'Very light or absent': 'Warrants a workup — several causes are reversible',
+    'Not sure': 'Tracking for 2–3 cycles would clarify a lot',
+  },
+  conditions: {
+    'None that I know of': 'A clean baseline to build on',
+    'PCOS': 'Manageable with the right protocol — often improves with treatment',
+    'Endometriosis': 'Treatable — laparoscopy often improves conception odds',
+    'Low ovarian reserve': 'Shifts priorities — earlier and more aggressive treatment',
+    'Other / not sure': 'A full workup will clarify what\'s at play',
+  },
+  testing: {
+    'Not yet': 'Adding biomarkers unlocks a meaningfully sharper picture',
+    'Yes, basic bloodwork': 'A solid start — extended panels add precision',
+    'Yes, full workup': 'You have what most clinicians would want to see',
+    'Yes, plus genetic screening': 'You have the most complete picture possible',
+  },
+};
+
+function biomarkerNote(marker) {
+  if (marker.status === 'good') {
+    return `${marker.value} ${marker.unit} — within the healthy ${marker.range} range`;
+  }
+  const direction = parseFloat(marker.value) < parseFloat(marker.range.split(/[–-]/)[0]) ? 'below' : 'above';
+  return `${marker.value} ${marker.unit} — ${direction} the ${marker.range} target`;
+}
+
+const statusToScore = { good: 88, attention: 55, critical: 32 };
+
+/**
+ * Returns a list of factors that contribute to the Eve Score, with individual
+ * 0-100 scores, brief notes, and a source tag ('profile' | 'biomarker').
+ * Used by the My Index "What's driving your score" breakdown.
+ */
+export function computeScoreFactors(profile = {}, biomarkers = []) {
+  const factors = [];
+
+  if (profile.age) {
+    factors.push({
+      key: 'age',
+      label: 'Age',
+      value: profile.age,
+      score: ageScores[profile.age] || 70,
+      note: factorNotes.age[profile.age] || 'Reflects typical fertility at this stage',
+      source: 'profile',
+    });
+  }
+
+  if (profile.cycles) {
+    factors.push({
+      key: 'cycles',
+      label: 'Cycle regularity',
+      value: profile.cycles,
+      score: cycleScores[profile.cycles] || 65,
+      note: factorNotes.cycles[profile.cycles] || '',
+      source: 'profile',
+    });
+  }
+
+  if (profile.conditions) {
+    factors.push({
+      key: 'conditions',
+      label: 'Conditions',
+      value: profile.conditions,
+      score: conditionScores[profile.conditions] || 70,
+      note: factorNotes.conditions[profile.conditions] || '',
+      source: 'profile',
+    });
+  }
+
+  if (profile.testing) {
+    factors.push({
+      key: 'testing',
+      label: 'Testing history',
+      value: profile.testing,
+      score: testingScores[profile.testing] || 60,
+      note: factorNotes.testing[profile.testing] || '',
+      source: 'profile',
+    });
+  }
+
+  for (const m of biomarkers) {
+    factors.push({
+      key: `bio-${m.name}`,
+      label: m.name,
+      value: `${m.value} ${m.unit}`,
+      score: statusToScore[m.status] || 70,
+      note: biomarkerNote(m),
+      source: 'biomarker',
+      status: m.status,
+    });
+  }
+
+  return factors;
+}
+
 export function computePathwayFit(profile, pathwayId) {
   const goalFits = {
     'Conceive': { natural: 85, iui: 70, ivf: 75, freeze: 30, splitFreeze: 25, donor: 45, surrogate: 25 },
