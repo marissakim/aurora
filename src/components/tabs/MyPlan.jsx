@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { ExternalLink, Sparkles } from 'lucide-react';
 import { colors, cardStyle, gradients } from '../../theme';
 import { getPlanForPathway } from '../../data/plan';
 import { composePlan } from '../../utils/planComposer';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 const categoryColors = {
   Health: { bg: '#E8F5E9', color: '#2E7D32' },
@@ -21,7 +21,11 @@ const pathwayBadges = {
 };
 
 export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
-  const [completed, setCompleted] = useState(new Set());
+  // Store completed task IDs as an array in localStorage (Set isn't serializable).
+  // Convert to a Set at use-site for fast lookups and immutable updates.
+  const [completedIds, setCompletedIds] = useLocalStorage('eve:completedTasks', []);
+  const completed = new Set(completedIds);
+
   // When user has committed to a specific pathway (e.g. donor-funded), use
   // that hand-authored plan. Otherwise compose from their onboarding profile.
   const plan = selectedPathway
@@ -31,11 +35,11 @@ export default function MyPlan({ profile = {}, selectedPathway, onNavigate }) {
   const isComposed = !selectedPathway;
 
   function toggleTask(id) {
-    setCompleted(prev => {
+    setCompletedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      return next;
+      return Array.from(next);
     });
   }
 

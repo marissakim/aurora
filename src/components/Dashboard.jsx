@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Activity, Target, MapPin, DollarSign, ClipboardList } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Activity, Target, MapPin, DollarSign, ClipboardList, LogOut } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
 import EveLogo from './ui/EveLogo';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import MyIndex from './tabs/MyIndex';
 import Biomarkers from './tabs/Biomarkers';
 import Pathways from './tabs/Pathways';
@@ -18,12 +19,34 @@ const tabs = [
   { id: 'plan', label: 'My Plan', icon: ClipboardList },
 ];
 
-export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers, initialDeepLink }) {
+export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers, onStartOver, initialDeepLink }) {
   const [activeTab, setActiveTab] = useState(initialDeepLink?.tab || 'overview');
   const [clinicsFilter, setClinicsFilter] = useState(initialDeepLink?.filter || null);
-  // Tracks which pathway the user has committed to. Set when they complete
-  // the donor-funded eligibility intake; personalizes My Plan accordingly.
-  const [selectedPathway, setSelectedPathway] = useState(null);
+  // Tracks which pathway the user has committed to. Persisted so refreshing
+  // the tab doesn't un-commit them from a donor program they already opted into.
+  const [selectedPathway, setSelectedPathway] = useLocalStorage('eve:selectedPathway', null);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close the avatar menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const onClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [showMenu]);
+
+  function handleStartOverClick() {
+    const confirmed = window.confirm(
+      'Start over? This clears your profile, biomarkers, and plan progress.',
+    );
+    if (confirmed) {
+      onStartOver?.();
+    }
+    setShowMenu(false);
+  }
 
   // Honor deep-link prop on mount (e.g., from BiomarkerIntake "Browse virtual testing")
   useEffect(() => {
@@ -80,14 +103,53 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
             Eve
           </span>
         </div>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          background: gradients.spice,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: 14, fontWeight: 700,
-          boxShadow: '0 2px 8px rgba(122, 66, 50, 0.2)',
-        }}>
-          {(profile.age || 'U')[0]}
+        <div ref={menuRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowMenu(s => !s)}
+            aria-label="Account menu"
+            style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: gradients.spice,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: 14, fontWeight: 700,
+              boxShadow: '0 2px 8px rgba(122, 66, 50, 0.2)',
+              border: 'none', cursor: 'pointer', padding: 0,
+              fontFamily: fonts.family,
+            }}
+          >
+            {(profile.age || 'U')[0]}
+          </button>
+          {showMenu && (
+            <div style={{
+              position: 'absolute', top: 44, right: 0,
+              background: '#fff',
+              border: `1px solid ${colors.border}`,
+              borderRadius: 12,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+              minWidth: 180,
+              overflow: 'hidden',
+              zIndex: 200,
+            }}>
+              <button
+                onClick={handleStartOverClick}
+                style={{
+                  width: '100%',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '12px 16px',
+                  background: 'none', border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 14, color: colors.text,
+                  fontFamily: fonts.family,
+                  textAlign: 'left',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = colors.bg}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <LogOut size={15} color={colors.textLight} />
+                Start over
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
