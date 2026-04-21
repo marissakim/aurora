@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, ArrowLeft, FlaskConical, Heart, Sparkles, Plus, Minus } from 'lucide-react';
 import { colors, gradients, fonts } from '../theme';
 import { biomarkerDefs } from '../data/biomarkers';
+import EveKitModal from './EveKitModal';
 
 // Three paths from this intake:
 //   'enter'  → form to add biomarker values
@@ -11,6 +12,7 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
   const [step, setStep] = useState('choose'); // choose | enter | tested
   const [values, setValues] = useState({});
   const [showExtended, setShowExtended] = useState(false);
+  const [showKitModal, setShowKitModal] = useState(false);
 
   const coreDefs = biomarkerDefs.filter(d => d.tier === 'core');
   const extendedDefs = biomarkerDefs.filter(d => d.tier === 'extended');
@@ -90,36 +92,39 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
         <Eyebrow>You&apos;re in good company</Eyebrow>
         <Headline>Most people start exactly here.</Headline>
         <Subhead>
-          Getting baseline labs is a great first step — and it doesn&apos;t require a fertility clinic.
-          Several telehealth providers offer at-home hormone panels for $179 or less, with results in 5–10 days.
+          Getting baseline labs is a great first step — and we&apos;ve made it as easy as possible.
+          Order an Eve Kit, do a finger prick at home, and your results land in this dashboard
+          in 5–7 days.
         </Subhead>
 
         <div style={{
-          background: 'linear-gradient(135deg, #FBF9F5 0%, #F7EBE6 100%)',
+          background: 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)',
+          border: `1px solid ${colors.border}`,
           borderRadius: 14,
           padding: 20,
           maxWidth: 480,
           width: '100%',
           marginBottom: 24,
         }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: colors.plum, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px' }}>
-            What to ask for
+          <p style={{ fontSize: 13, fontWeight: 600, color: colors.spice, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px' }}>
+            Three at-home Eve Kits
           </p>
-          <p style={{ fontSize: 14, color: colors.text, margin: '0 0 12px', lineHeight: 1.6 }}>
-            A standard fertility panel measures <strong>AMH, FSH, AFC, TSH, and Vitamin D</strong>.
-            Most providers also include estradiol, prolactin, and thyroid antibodies.
-          </p>
-          <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
-            Eve can help you understand the results once you have them.
+          <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontSize: 14, color: colors.text, lineHeight: 1.7 }}>
+            <li><strong>Reproductive Health</strong> — the standard fertility baseline ($149)</li>
+            <li><strong>PCOS Health</strong> — for irregular cycles or suspected PCOS ($179)</li>
+            <li><strong>Metabolic Health</strong> — insulin, thyroid, and lipids ($169)</li>
+          </ul>
+          <p style={{ fontSize: 12, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
+            HSA / FSA eligible · Free shipping · CLIA-certified lab
           </p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 480 }}>
           <button
-            onClick={() => onGetTested?.()}
+            onClick={() => setShowKitModal(true)}
             style={primaryBtn}
           >
-            Browse virtual testing options <ArrowRight size={16} />
+            See my kit options <ArrowRight size={16} />
           </button>
           <button
             onClick={() => onComplete([])}
@@ -128,6 +133,14 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested }) {
             Continue to dashboard
           </button>
         </div>
+
+        {showKitModal && (
+          <EveKitModal
+            profile={profile}
+            onClose={() => setShowKitModal(false)}
+            onOrdered={() => { /* In a real version we'd track this */ }}
+          />
+        )}
       </Shell>
     );
   }

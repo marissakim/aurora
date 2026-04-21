@@ -43,7 +43,7 @@ export default function Dashboard({ profile, biomarkers = [], onUpdateBiomarkers
   const renderTab = () => {
     switch (activeTab) {
       case 'overview': return <MyIndex profile={profile} biomarkers={biomarkers} onNavigate={navigate} />;
-      case 'markers': return <Biomarkers biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onNavigate={navigate} />;
+      case 'markers': return <Biomarkers profile={profile} biomarkers={biomarkers} onUpdateBiomarkers={onUpdateBiomarkers} onNavigate={navigate} />;
       case 'pathways': return <Pathways profile={profile} onPathwaySelected={setSelectedPathway} />;
       case 'clinics': return <FindClinics profile={profile} initialFilter={clinicsFilter} />;
       case 'costs': return <Costs />;

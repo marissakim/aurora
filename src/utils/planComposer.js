@@ -40,15 +40,23 @@ const TASKS = [
   // ─────────── Baseline testing (depends on testing answer) ────────
   {
     id: 'baseline-panel',
-    text: 'Get a baseline fertility panel (AMH, FSH, AFC, TSH, Vitamin D)',
+    text: 'Order an Eve Reproductive Health Kit ($149) — at-home finger prick, results in 5–7 days. Easiest way to get your baseline numbers.',
     category: 'Appointment',
     phase: 1,
     priority: 10,
-    when: p => p.testing === 'Not yet',
+    when: p => p.testing === 'Not yet' && p.conditions !== 'PCOS' && p.cycles !== 'Irregular' && p.cycles !== 'Very light or absent',
+  },
+  {
+    id: 'baseline-panel-pcos',
+    text: 'Order an Eve PCOS Health Kit ($179) — adds testosterone, insulin, and HbA1c to the standard panel. Worth getting the right kit for your situation.',
+    category: 'Appointment',
+    phase: 1,
+    priority: 10,
+    when: p => p.testing === 'Not yet' && (p.conditions === 'PCOS' || p.cycles === 'Irregular' || p.cycles === 'Very light or absent'),
   },
   {
     id: 'extended-panel',
-    text: 'Add Estradiol, LH, and Prolactin to your next bloodwork — a fuller picture for the same visit',
+    text: 'Order an Eve Reproductive Kit to fill in Estradiol, LH, and Prolactin — a fuller picture without going back to a clinic.',
     category: 'Appointment',
     phase: 2,
     priority: 6,

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Plus, Info, ChevronDown, FlaskConical } from 'lucide-react';
+import { Plus, Info, ChevronDown, FlaskConical, Video, ArrowRight } from 'lucide-react';
 import { colors, cardStyle, fonts } from '../../theme';
 import { biomarkerEducation } from '../../data/biomarkers';
 import StatusBadge from '../ui/StatusBadge';
 import AddBiomarkersModal from '../AddBiomarkersModal';
+import EveKitModal from '../EveKitModal';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
 
@@ -77,7 +78,7 @@ function EducationSection({ edu }) {
 }
 
 // Friendly empty state — trusted-guide tone, clear CTAs, not pushy.
-function EmptyBiomarkers({ onAdd, onGetTested }) {
+function EmptyBiomarkers({ onAdd, onOrderKit }) {
   return (
     <div style={{
       ...cardStyle,
@@ -106,8 +107,8 @@ function EmptyBiomarkers({ onAdd, onGetTested }) {
         margin: '0 auto 20px', maxWidth: 480, lineHeight: 1.6,
       }}>
         Your biomarkers help Eve give you personalized insights and a plan that reflects
-        where you actually are. Enter what you have, or find affordable virtual testing
-        if you haven&apos;t been tested yet.
+        where you actually are. Enter what you have, or order an Eve Kit and we&apos;ll
+        load the results in for you.
       </p>
       <div style={{
         display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap',
@@ -131,29 +132,30 @@ function EmptyBiomarkers({ onAdd, onGetTested }) {
           <Plus size={16} /> Add my results
         </button>
         <button
-          onClick={onGetTested}
+          onClick={onOrderKit}
           style={{
             background: '#fff',
-            color: colors.text,
-            border: `1px solid ${colors.border}`,
+            color: colors.spice,
+            border: `1px solid ${colors.spice}`,
             padding: '12px 22px',
             borderRadius: 999,
             fontSize: 14,
-            fontWeight: 500,
+            fontWeight: 600,
             cursor: 'pointer',
             fontFamily: fonts.family,
           }}
         >
-          Find testing options
+          Order an Eve Kit
         </button>
       </div>
     </div>
   );
 }
 
-export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavigate }) {
+export default function Biomarkers({ profile = {}, biomarkers = [], onUpdateBiomarkers, onNavigate }) {
   const [expanded, setExpanded] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showKitModal, setShowKitModal] = useState(false);
 
   // Empty state: prompt user to add results or find testing
   if (biomarkers.length === 0) {
@@ -167,8 +169,22 @@ export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavi
         </p>
         <EmptyBiomarkers
           onAdd={() => setShowAddModal(true)}
-          onGetTested={() => onNavigate?.('clinics', { filter: 'Virtual Care' })}
+          onOrderKit={() => setShowKitModal(true)}
         />
+        {/* Tertiary: virtual care for help understanding what to test */}
+        <p style={{
+          textAlign: 'center', fontSize: 13, color: colors.textLight,
+          marginTop: 16, lineHeight: 1.6,
+        }}>
+          Want to talk to a provider first? <button
+            onClick={() => onNavigate?.('clinics', { filter: 'Virtual Care' })}
+            style={{
+              background: 'none', border: 'none', padding: 0,
+              color: colors.teal, fontWeight: 600, cursor: 'pointer',
+              textDecoration: 'underline', fontFamily: fonts.family, fontSize: 13,
+            }}
+          >Browse virtual care options →</button>
+        </p>
         {showAddModal && (
           <AddBiomarkersModal
             existing={biomarkers}
@@ -176,9 +192,18 @@ export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavi
             onSave={onUpdateBiomarkers}
           />
         )}
+        {showKitModal && (
+          <EveKitModal
+            profile={profile}
+            onClose={() => setShowKitModal(false)}
+          />
+        )}
       </div>
     );
   }
+
+  // Has biomarkers — show interpretation banner if any need attention
+  const needsInterpretation = biomarkers.some(b => b.status !== 'good');
 
   return (
     <div>
@@ -205,9 +230,45 @@ export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavi
           <Plus size={16} /> Log Results
         </button>
       </div>
-      <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 20px' }}>
+      <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 16px' }}>
         Tap any marker to see the trend chart and learn what it means.
       </p>
+
+      {/* Interpretation banner — shown when any marker needs attention */}
+      {needsInterpretation && (
+        <div
+          onClick={() => onNavigate?.('clinics', { filter: 'Virtual Care' })}
+          style={{
+            background: 'linear-gradient(135deg, #E0F2F1 0%, #FFF8E1 100%)',
+            border: `1px solid ${colors.border}`,
+            borderRadius: 12,
+            padding: '12px 16px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: colors.teal,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <Video size={16} color="#fff" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: colors.text, margin: '0 0 2px' }}>
+              Want help understanding these results?
+            </p>
+            <p style={{ fontSize: 12, color: colors.textLight, margin: 0, lineHeight: 1.4 }}>
+              A virtual consult ($25–$250) can walk you through what to do next.
+            </p>
+          </div>
+          <ArrowRight size={16} color={colors.textLight} style={{ flexShrink: 0 }} />
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
         {biomarkers.map(marker => {
@@ -280,6 +341,12 @@ export default function Biomarkers({ biomarkers = [], onUpdateBiomarkers, onNavi
           existing={biomarkers}
           onClose={() => setShowAddModal(false)}
           onSave={onUpdateBiomarkers}
+        />
+      )}
+      {showKitModal && (
+        <EveKitModal
+          profile={profile}
+          onClose={() => setShowKitModal(false)}
         />
       )}
     </div>
