@@ -1,0 +1,15 @@
+{
+  "name": "eve-ai-worker",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Cloudflare Worker that proxies Eve's insight requests to Claude.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.84.1"
+  }
+}

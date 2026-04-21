@@ -25,6 +25,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # Cloudflare Worker that proxies AI insight requests to Claude.
+          # Not a secret — just a URL. On worker failure the frontend falls
+          # back to the deterministic mock in src/utils/aiInsightsMock.js.
+          VITE_WORKER_URL: https://eve-ai.eve-prototype.workers.dev
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

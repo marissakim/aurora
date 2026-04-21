@@ -1,0 +1,17 @@
+name = "eve-ai"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# CORS origin for the live site — edit if you move domains.
+[vars]
+ALLOWED_ORIGIN = "https://marissakim.github.io"
+
+# KV namespace used for both response caching (24h) and per-IP rate limits.
+# Create with: `wrangler kv namespace create aurora-cache`
+# Then paste the returned `id` below.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "db75e430d1304004971e6bb8d3bfbfe8"
+
+# ANTHROPIC_API_KEY is set via `wrangler secret put ANTHROPIC_API_KEY` —
+# never hardcode it here.
