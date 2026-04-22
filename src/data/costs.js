@@ -7,9 +7,36 @@ export const costData = [
   { pathway: 'Surrogacy', low: 100000, average: 150000, high: 200000 },
 ];
 
+// Real fertility-financial partners. Each card links out to the partner's
+// site. Three of these (Carrot, Progyny, Maven) are employer-sponsored
+// benefits — Cofertility is direct-to-consumer.
 export const financialResources = [
-  { title: 'Employer Benefits Finder', description: 'Check if your employer offers fertility benefits through Carrot, Progyny, or Maven.', icon: 'Briefcase' },
-  { title: 'Insurance Decoder', description: 'Understand what your insurance plan covers for fertility treatments.', icon: 'Shield' },
-  { title: 'Loans & Grants Database', description: 'Explore fertility-specific financing, grants, and scholarship programs.', icon: 'DollarSign' },
-  { title: 'FSA/HSA Guide', description: 'Learn how to use pre-tax dollars for fertility expenses.', icon: 'Wallet' },
+  {
+    name: 'Cofertility',
+    url: 'https://cofertility.com',
+    tagline: 'Free egg freezing via donation',
+    description: 'Donate half your eggs to an intended parent and receive your egg freezing cycle (and 10 years of storage) at no cost.',
+    icon: '\uD83D\uDC9D',
+  },
+  {
+    name: 'Carrot Fertility',
+    url: 'https://get-carrot.com',
+    tagline: 'Employer-sponsored fertility benefits',
+    description: 'Comprehensive fertility coverage offered through your employer. Check your benefits portal to see if Carrot is included.',
+    icon: '\uD83E\uDD55',
+  },
+  {
+    name: 'Progyny',
+    url: 'https://progyny.com',
+    tagline: 'Employer-sponsored, with care navigation',
+    description: 'Fertility benefits platform with personal care advocates and a curated network of clinics. Available through participating employers.',
+    icon: '\uD83C\uDF31',
+  },
+  {
+    name: 'Maven Clinic',
+    url: 'https://mavenclinic.com',
+    tagline: 'Women\'s health benefits, including fertility',
+    description: 'Virtual care platform covering preconception, fertility, and family-building. Often offered as part of employer benefits.',
+    icon: '\uD83D\uDC99',
+  },
 ];

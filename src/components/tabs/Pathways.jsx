@@ -126,7 +126,10 @@ export default function Pathways({ profile, onPathwaySelected, onNavigate }) {
                     ))}
                   </ol>
 
-                  {p.isDonorProgram ? (
+                  {/* Action button only for pathways with a real next step (donor program intake).
+                      Non-donor pathways: the personalized steps above already serve as the "what to do"
+                      and the My Plan tab carries those forward. No dead 'Add to My Plan' button. */}
+                  {p.isDonorProgram && (
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowDonorIntake(true); }}
                       style={{
@@ -145,23 +148,6 @@ export default function Pathways({ profile, onPathwaySelected, onNavigate }) {
                       }}
                     >
                       💝 Start Eligibility Intake (2 min)
-                    </button>
-                  ) : (
-                    <button style={{
-                      marginTop: 16,
-                      background: colors.spice,
-                      color: '#FBF9F5',
-                      border: 'none',
-                      padding: '12px 24px',
-                      borderRadius: 999,
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      width: '100%',
-                      fontFamily: 'inherit',
-                      boxShadow: '0 3px 12px rgba(122, 66, 50, 0.25)',
-                    }}>
-                      Add to My Plan
                     </button>
                   )}
                 </div>

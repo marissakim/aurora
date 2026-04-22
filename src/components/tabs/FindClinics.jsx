@@ -202,19 +202,28 @@ export default function FindClinics({ profile, initialFilter }) {
                     </span>
                   </div>
                 </div>
-                <button style={{
-                  background: '#F0EAEC',
-                  color: colors.plum,
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: 8,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}>
-                  View Details
-                </button>
+                <a
+                  href={clinic.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: colors.spice,
+                    color: '#FBF9F5',
+                    border: 'none',
+                    padding: '8px 14px',
+                    borderRadius: 999,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  Visit Site <ExternalLink size={12} />
+                </a>
               </div>
               <div style={{ display: 'flex', gap: 24, marginTop: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

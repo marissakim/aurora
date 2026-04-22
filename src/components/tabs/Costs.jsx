@@ -1,8 +1,6 @@
-import { Briefcase, Shield, DollarSign, Wallet } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { colors, cardStyle } from '../../theme';
 import { costData, financialResources } from '../../data/costs';
-
-const iconMap = { Briefcase, Shield, DollarSign, Wallet };
 
 const costBreakdown = [
   { pathway: 'IVF', cost: '$15K–$30K', note: 'Includes medications, monitoring, retrieval, and transfer. May need multiple cycles.' },
@@ -74,25 +72,49 @@ export default function Costs() {
       {/* Financial Resources */}
       <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: '0 0 12px' }}>Financial Resources</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-        {financialResources.map(res => {
-          const Icon = iconMap[res.icon];
-          return (
-            <div key={res.title} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: '#F0EAEC',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <Icon size={20} color={colors.plum} />
-              </div>
-              <div>
-                <h4 style={{ fontSize: 15, fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>{res.title}</h4>
-                <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>{res.description}</p>
-              </div>
+        {financialResources.map(res => (
+          <a
+            key={res.name}
+            href={res.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              ...cardStyle,
+              display: 'flex',
+              gap: 14,
+              alignItems: 'flex-start',
+              textDecoration: 'none',
+              color: 'inherit',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.06)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: colors.bg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              fontSize: 20,
+            }}>
+              {res.icon}
             </div>
-          );
-        })}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: colors.text, margin: 0 }}>{res.name}</h4>
+                <ExternalLink size={12} color={colors.textLight} />
+              </div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: colors.spice, margin: '0 0 4px' }}>{res.tagline}</p>
+              <p style={{ fontSize: 13, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>{res.description}</p>
+            </div>
+          </a>
+        ))}
       </div>
     </div>
   );
