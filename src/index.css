@@ -50,3 +50,43 @@ body {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── Eve logo animations ─────────────────────────────────────────
+   Used on the landing page (animated=true on EveLogo component).
+   Two layers:
+   1. Whole-logo entry: subtle fade + scale on first paint
+   2. Continuous leaf sway: gentle 4° rotation of the leaf around its
+      base, looping every 5s — feels alive without being distracting.
+   ─────────────────────────────────────────────────────────────── */
+@keyframes eve-logo-enter {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes eve-leaf-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.eve-logo-animated {
+  animation: eve-logo-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center;
+}
+
+.eve-logo-animated .eve-logo-leaf {
+  /* Sway pivots from the base of the leaf (left edge, vertical middle of
+     the leaf's bounding box) where it joins the stem. transform-box uses
+     the SVG viewBox, so origin is in viewBox coordinates. */
+  transform-box: view-box;
+  transform-origin: 20px 12px;
+  animation: eve-leaf-sway 5s ease-in-out infinite;
+  /* Wait until the entry animation finishes before starting the sway */
+  animation-delay: 1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eve-logo-animated,
+  .eve-logo-animated .eve-logo-leaf {
+    animation: none;
+  }
+}

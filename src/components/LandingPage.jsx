@@ -39,7 +39,7 @@ export default function LandingPage({ onGetStarted }) {
         zIndex: 1,
       }}>
         <div className="eve-hero-leaf" style={{ color: '#E8E4DD', opacity: 0.85, lineHeight: 0 }}>
-          <EveLogo size={72} strokeWidth={1.25} />
+          <EveLogo size={72} strokeWidth={1.25} animated />
         </div>
         <h1
           className="eve-hero-brand"
