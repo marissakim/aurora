@@ -43,7 +43,7 @@ const TASKS = [
   // ─────────── Baseline testing (depends on testing answer) ────────
   {
     id: 'baseline-panel',
-    text: 'Order an Eve Basic Fertility Kit ($199) — covers TSH, LH/FSH, and AMH. At-home finger prick, results in 5–7 days. The fastest way to get your baseline numbers.',
+    text: 'Order an Eve Basic Fertility Kit ($199) — covers TSH, LH/FSH, and AMH. At-home finger prick, results in 5–15 days. The fastest way to get your baseline numbers.',
     category: 'Appointment',
     phase: 1,
     priority: 10,

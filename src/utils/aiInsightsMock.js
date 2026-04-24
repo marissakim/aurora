@@ -200,7 +200,7 @@ function generateSummary(profile, biomarkers, score) {
 
 function generateWelcomeSummary(profile) {
   const timelineCue = profile.timeline === 'Now'
-    ? "Since you're looking to start now, the most useful next step is usually a baseline fertility panel — an Eve Basic Fertility Kit is $199, results in 5–7 days."
+    ? "Since you're looking to start now, the most useful next step is usually a baseline fertility panel — an Eve Basic Fertility Kit is $199, results in 5–15 days."
     : profile.timeline === 'Within 6 months'
       ? "You have a comfortable window to gather baseline data and build a plan before making any big decisions."
       : "With your timeline, you have time to do this thoughtfully. Start with a baseline panel whenever you're ready.";
