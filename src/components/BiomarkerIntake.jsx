@@ -5,14 +5,15 @@ import { biomarkerDefs } from '../data/biomarkers';
 import EveKitModal from './EveKitModal';
 
 // Three paths from this intake:
-//   'enter'  → form to add biomarker values
-//   'tested' → educational screen with virtual care CTA
-//   'skip'   → straight to dashboard with empty biomarkers
+//   'enter' step         → form to add biomarker values
+//   kit modal (overlay)  → user hasn't tested yet, wants to order a kit
+//   'skip'               → straight to dashboard with empty biomarkers
 export default function BiomarkerIntake({ profile, onComplete, onGetTested, onKitOrdered }) {
-  const [step, setStep] = useState('choose'); // choose | enter | tested
+  const [step, setStep] = useState('choose'); // choose | enter
   const [values, setValues] = useState({});
   const [showExtended, setShowExtended] = useState(false);
   const [showKitModal, setShowKitModal] = useState(false);
+  const [orderedKit, setOrderedKit] = useState(false);
 
   const coreDefs = biomarkerDefs.filter(d => d.tier === 'core');
   const extendedDefs = biomarkerDefs.filter(d => d.tier === 'extended');
@@ -75,8 +76,8 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested, onKi
           <ChoiceCard
             icon={<Heart size={20} color={colors.teal} />}
             title="Not yet — I haven't been tested"
-            sub="We'll point you toward affordable virtual testing."
-            onClick={() => setStep('tested')}
+            sub="Browse our at-home Eve Kits, starting at $99."
+            onClick={() => setShowKitModal(true)}
           />
           <button
             onClick={() => onComplete([])}
@@ -89,66 +90,21 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested, onKi
             Skip for now — I&apos;ll add this later
           </button>
         </div>
-      </Shell>
-    );
-  }
-
-  // TESTED STEP: warm explainer + CTAs
-  if (step === 'tested') {
-    return (
-      <Shell>
-        <BackLink onClick={() => setStep('choose')} />
-        <Eyebrow>You&apos;re in good company</Eyebrow>
-        <Headline>Most people start exactly here.</Headline>
-        <Subhead>
-          Getting baseline labs is a great first step — and we&apos;ve made it as easy as possible.
-          Order an Eve Kit, do a finger prick at home, and your results land in this dashboard
-          in 5–7 days.
-        </Subhead>
-
-        <div style={{
-          background: 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)',
-          border: `1px solid ${colors.border}`,
-          borderRadius: 14,
-          padding: 20,
-          maxWidth: 480,
-          width: '100%',
-          marginBottom: 24,
-        }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: colors.spice, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px' }}>
-            Four at-home Eve Kits
-          </p>
-          <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontSize: 14, color: colors.text, lineHeight: 1.7 }}>
-            <li><strong>Basic Fertility</strong> — TSH, LH/FSH, AMH ($199)</li>
-            <li><strong>Full Fertility</strong> — 11 markers including cortisol, DHEA, full thyroid ($299)</li>
-            <li><strong>Inflammation</strong> — hs-CRP + Vitamin D, for everyone ($99)</li>
-            <li><strong>Thyroid</strong> — focused TSH/T3/T4/TPO panel ($99)</li>
-          </ul>
-          <p style={{ fontSize: 12, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
-            HSA / FSA eligible · Free shipping · CLIA-certified lab
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 480 }}>
-          <button
-            onClick={() => setShowKitModal(true)}
-            style={primaryBtn}
-          >
-            See my kit options <ArrowRight size={16} />
-          </button>
-          <button
-            onClick={() => onComplete([])}
-            style={ghostBtn}
-          >
-            Continue to dashboard
-          </button>
-        </div>
 
         {showKitModal && (
           <EveKitModal
             profile={profile}
-            onClose={() => setShowKitModal(false)}
-            onOrdered={kit => onKitOrdered?.(kit)}
+            onClose={() => {
+              setShowKitModal(false);
+              // If they actually placed an order, take them straight to the
+              // dashboard — otherwise they bounce back to this choose screen
+              // which is confusing after a successful order.
+              if (orderedKit) onComplete([]);
+            }}
+            onOrdered={kit => {
+              setOrderedKit(true);
+              onKitOrdered?.(kit);
+            }}
           />
         )}
       </Shell>
