@@ -86,8 +86,9 @@ function ChooserView({ profile, recommended, onOrder }) {
         Choose your at-home panel
       </h2>
       <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 6px', lineHeight: 1.6 }}>
-        A single finger-prick at home, results in 5–7 days once we receive your sample.
-        Start with a primary kit, then add Inflammation or Thyroid screening if either is useful for you.
+        A single finger-prick at home. The lab emails your results in 5–7 days — add them
+        to Eve for personalized insights. Start with a primary kit, then add Inflammation
+        or Thyroid screening if either is useful for you.
       </p>
       <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 20px', fontStyle: 'italic', lineHeight: 1.5 }}>
         {shippingSummary}
@@ -275,8 +276,9 @@ function ConfirmationView({ kit, onClose }) {
       </h2>
       <p style={{ fontSize: 15, color: colors.textLight, margin: '0 0 24px', lineHeight: 1.6, maxWidth: 460, marginLeft: 'auto', marginRight: 'auto' }}>
         Expect it in your mailbox in 3–5 business days, depending on the shipping option
-        you chose. Once you mail your sample back, results land in your Eve dashboard within
-        5–7 days — no separate accounts to juggle.
+        you chose. Once you mail your sample back, the lab will email your results in 5–7
+        days. Come back to Eve and add them in the Biomarkers tab — we&apos;ll refresh your
+        plan with the new numbers.
       </p>
 
       <div style={{
@@ -294,7 +296,7 @@ function ConfirmationView({ kit, onClose }) {
           <li>Kit arrives in 3–5 business days</li>
           <li>Finger prick at home — takes about 5 minutes</li>
           <li>Drop pre-paid envelope in any mailbox</li>
-          <li>Results auto-load into your Biomarkers tab</li>
+          <li>Add your results to the Biomarkers tab when they arrive</li>
         </ol>
       </div>
 

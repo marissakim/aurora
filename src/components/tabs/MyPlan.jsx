@@ -250,7 +250,7 @@ function KitStatusBanner({ orderedKit }) {
     { label: 'Shipped', date: fmt(shipDate), done: shipped },
     { label: 'Delivered', date: `~${fmt(arrivalDate)}`, done: delivered },
     { label: 'Sample mailed back', date: sampleReturned ? 'Done' : 'Your move', done: sampleReturned },
-    { label: 'Results in your dashboard', date: resultsReady ? 'Ready' : '5–7 days after mailing', done: resultsReady },
+    { label: 'Add your results to Eve', date: resultsReady ? 'Done' : 'Once the lab emails them', done: resultsReady },
   ];
 
   return (

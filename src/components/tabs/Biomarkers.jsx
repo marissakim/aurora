@@ -107,8 +107,8 @@ function EmptyBiomarkers({ onAdd, onOrderKit }) {
         margin: '0 auto 20px', maxWidth: 480, lineHeight: 1.6,
       }}>
         Your biomarkers help Eve give you personalized insights and a plan that reflects
-        where you actually are. Enter what you have, or order an Eve Kit and we&apos;ll
-        load the results in for you.
+        where you actually are. Enter what you have, or order an Eve Kit — you&apos;ll
+        add your results here when the lab emails them.
       </p>
       <div style={{
         display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap',
