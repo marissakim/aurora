@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, ArrowRight, Check, Truck, Sparkles } from 'lucide-react';
 import { colors, fonts, gradients } from '../theme';
 import { eveKits, recommendKit } from '../data/kits';
+import { shippingSummary } from '../data/shipping';
 import EveLogo from './ui/EveLogo';
 
 // Three-kit chooser modal. Recommends the kit best matched to the user's
@@ -84,9 +85,12 @@ function ChooserView({ profile, recommended, onOrder }) {
       }}>
         Choose your at-home panel
       </h2>
-      <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px', lineHeight: 1.6 }}>
-        A single finger-prick at home, results in 5–7 days, delivered to your dashboard.
+      <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 6px', lineHeight: 1.6 }}>
+        A single finger-prick at home, results in 5–7 days once we receive your sample.
         Start with a primary kit, then add Inflammation or Thyroid screening if either is useful for you.
+      </p>
+      <p style={{ fontSize: 13, color: colors.textLight, margin: '0 0 20px', fontStyle: 'italic', lineHeight: 1.5 }}>
+        {shippingSummary}
       </p>
 
       {/* Primary kits — pick one */}
@@ -270,8 +274,9 @@ function ConfirmationView({ kit, onClose }) {
         Your {kit.name.toLowerCase()} is on the way
       </h2>
       <p style={{ fontSize: 15, color: colors.textLight, margin: '0 0 24px', lineHeight: 1.6, maxWidth: 460, marginLeft: 'auto', marginRight: 'auto' }}>
-        Expect it in your mailbox in 2–3 business days. Once you mail your sample back,
-        results land in your Eve dashboard within 5–7 days — no separate accounts to juggle.
+        Expect it in your mailbox in 3–5 business days, depending on the shipping option
+        you chose. Once you mail your sample back, results land in your Eve dashboard within
+        5–7 days — no separate accounts to juggle.
       </p>
 
       <div style={{
@@ -286,7 +291,7 @@ function ConfirmationView({ kit, onClose }) {
           What happens next
         </p>
         <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: colors.text, lineHeight: 1.8 }}>
-          <li>Kit arrives in 2–3 business days</li>
+          <li>Kit arrives in 3–5 business days</li>
           <li>Finger prick at home — takes about 5 minutes</li>
           <li>Drop pre-paid envelope in any mailbox</li>
           <li>Results auto-load into your Biomarkers tab</li>
