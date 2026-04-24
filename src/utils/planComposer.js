@@ -43,33 +43,68 @@ const TASKS = [
   // ─────────── Baseline testing (depends on testing answer) ────────
   {
     id: 'baseline-panel',
-    text: 'Order an Eve Reproductive Health Kit ($149) — at-home finger prick, results in 5–7 days. Easiest way to get your baseline numbers.',
+    text: 'Order an Eve Basic Fertility Kit ($199) — covers TSH, LH/FSH, and AMH. At-home finger prick, results in 5–7 days. The fastest way to get your baseline numbers.',
     category: 'Appointment',
     phase: 1,
     priority: 10,
     when: p => p.testing === 'Not yet' && (
-      // Standard reproductive users without PCOS signals
-      (p.conditions !== 'PCOS' && p.cycles !== 'Irregular' && p.cycles !== 'Very light or absent')
-      // OR donor/surrogacy users — they need baseline, not a PCOS workup
+      // Standard users without PCOS/reserve signals — Basic is enough
+      (p.conditions !== 'PCOS'
+        && p.conditions !== 'Low ovarian reserve'
+        && p.cycles !== 'Irregular'
+        && p.cycles !== 'Very light or absent')
+      // OR donor/surrogacy users — just need baseline
       || p.goal === 'Donor/surrogacy'
     ),
   },
   {
-    id: 'baseline-panel-pcos',
-    text: 'Order an Eve PCOS Health Kit ($179) — adds testosterone, insulin, and HbA1c to the standard panel. Worth getting the right kit for your situation.',
+    id: 'baseline-panel-full',
+    text: 'Order an Eve Full Fertility Kit ($299) — adds cortisol, DHEA, Estradiol, Progesterone, Testosterone, and a complete thyroid panel (T3, T4, TPO). The comprehensive workup your situation warrants.',
     category: 'Appointment',
     phase: 1,
     priority: 10,
-    when: p => p.testing === 'Not yet' && (p.conditions === 'PCOS' || p.cycles === 'Irregular' || p.cycles === 'Very light or absent') && p.goal !== 'Donor/surrogacy',
+    when: p => p.testing === 'Not yet'
+      && (p.conditions === 'PCOS' || p.conditions === 'Low ovarian reserve' || p.cycles === 'Irregular' || p.cycles === 'Very light or absent')
+      && p.goal !== 'Donor/surrogacy',
   },
   {
     id: 'extended-panel',
-    text: 'Order an Eve Reproductive Kit to fill in Estradiol, LH, and Prolactin — a fuller picture without going back to a clinic.',
+    text: 'Upgrade to an Eve Full Fertility Kit ($299) — fills in Estradiol, Progesterone, T3/T4/TPO, cortisol, and DHEA that a basic panel misses. Worth it before any treatment protocol decisions.',
     category: 'Appointment',
     phase: 2,
     priority: 6,
     // Less relevant for donor-egg users — their own reproductive hormones matter less
     when: p => p.testing === 'Yes, basic bloodwork' && p.goal !== 'Donor/surrogacy',
+  },
+  {
+    id: 'inflammation-addon',
+    // Dynamic copy — the endometriosis version leads with that context.
+    text: (p) => p.conditions === 'Endometriosis'
+      ? 'Consider adding an Eve Inflammation Kit ($99) — endometriosis is an inflammatory condition, and hs-CRP + Vitamin D together tell you how well your body is positioned to support implantation. Pairs with whichever fertility kit you pick.'
+      : 'Consider adding an Eve Inflammation Kit ($99) — hs-CRP and Vitamin D quietly shape implantation chances for everyone trying to conceive. Easy $99 add-on to whichever fertility kit you pick.',
+    category: 'Health',
+    phase: 2,
+    // Bumped priority (6) slightly above the default 5 so endometriosis users
+    // reliably see this task; non-endo users still see it alongside the other
+    // phase-2 recommendations.
+    priority: 6,
+    when: p => p.testing === 'Not yet' && p.goal !== 'Donor/surrogacy',
+  },
+  {
+    id: 'thyroid-addon',
+    text: 'Consider adding an Eve Thyroid Kit ($99) to your Basic Fertility Kit — a focused T3 / T4 / TPO panel catches subclinical thyroid issues that quietly disrupt ovulation and implantation. Skip if you\'re going with the Full Fertility Kit, which already includes these.',
+    category: 'Health',
+    phase: 2,
+    priority: 5,
+    // Only suggest to users whose recommended primary kit is Basic.
+    // Full already includes TSH/T3/T4/TPO so the Thyroid add-on would duplicate.
+    when: p => p.testing === 'Not yet'
+      && p.goal !== 'Donor/surrogacy'
+      && !(p.conditions === 'PCOS'
+        || p.conditions === 'Low ovarian reserve'
+        || p.cycles === 'Irregular'
+        || p.cycles === 'Very light or absent'
+        || p.goal === 'In active IVF/IUI treatment'),
   },
   {
     id: 'genetic-screen',

@@ -200,7 +200,7 @@ function generateSummary(profile, biomarkers, score) {
 
 function generateWelcomeSummary(profile) {
   const timelineCue = profile.timeline === 'Now'
-    ? "Since you're looking to start now, the most useful next step is usually a baseline fertility panel — it takes 5–10 days and costs around $179."
+    ? "Since you're looking to start now, the most useful next step is usually a baseline fertility panel — an Eve Basic Fertility Kit is $199, results in 5–7 days."
     : profile.timeline === 'Within 6 months'
       ? "You have a comfortable window to gather baseline data and build a plan before making any big decisions."
       : "With your timeline, you have time to do this thoughtfully. Start with a baseline panel whenever you're ready.";
@@ -260,7 +260,7 @@ export async function generateAnalysisMock(profile, biomarkers) {
     const baselineInsight = {
       type: 'suggestion',
       title: 'A baseline unlocks everything',
-      text: 'Adding a few test results — even just AMH, FSH, and AFC — transforms this from a general guide into a plan tailored to you. Most people start with an at-home fertility panel ($179) before ever stepping into a clinic.',
+      text: 'Adding a few test results — even just AMH, TSH, and LH/FSH — transforms this from a general guide into a plan tailored to you. Most people start with an Eve Basic Fertility Kit ($199) before ever stepping into a clinic.',
       priority: 10,
     };
     return {

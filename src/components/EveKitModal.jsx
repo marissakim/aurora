@@ -86,17 +86,30 @@ function ChooserView({ profile, recommended, onOrder }) {
       </h2>
       <p style={{ fontSize: 14, color: colors.textLight, margin: '0 0 20px', lineHeight: 1.6 }}>
         A single finger-prick at home, results in 5–7 days, delivered to your dashboard.
-        Pick the kit that fits where you are right now — you can always order another.
+        Start with a primary kit, then add Inflammation or Thyroid screening if either is useful for you.
       </p>
 
-      {/* Kit cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {eveKits.map(kit => (
+      {/* Primary kits — pick one */}
+      <SectionLabel>Start here — pick one</SectionLabel>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+        {eveKits.filter(k => k.type === 'primary').map(kit => (
           <KitCard
             key={kit.id}
             kit={kit}
             isRecommended={kit.id === recommended}
-            profile={profile}
+            onOrder={() => onOrder(kit)}
+          />
+        ))}
+      </div>
+
+      {/* Add-on kits — supplement any primary */}
+      <SectionLabel>Add-ons — relevant for anyone trying to conceive</SectionLabel>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {eveKits.filter(k => k.type === 'addon').map(kit => (
+          <KitCard
+            key={kit.id}
+            kit={kit}
+            isAddon
             onOrder={() => onOrder(kit)}
           />
         ))}
@@ -118,7 +131,19 @@ function ChooserView({ profile, recommended, onOrder }) {
   );
 }
 
-function KitCard({ kit, isRecommended, profile, onOrder }) {
+function SectionLabel({ children }) {
+  return (
+    <p style={{
+      fontSize: 11, fontWeight: 700, color: colors.textLight,
+      textTransform: 'uppercase', letterSpacing: 0.8,
+      margin: '0 0 10px',
+    }}>
+      {children}
+    </p>
+  );
+}
+
+function KitCard({ kit, isRecommended, isAddon, onOrder }) {
   const [showAll, setShowAll] = useState(false);
   const visibleMarkers = showAll ? kit.markers : kit.markers.slice(0, 5);
   const hiddenCount = kit.markers.length - visibleMarkers.length;
@@ -127,9 +152,13 @@ function KitCard({ kit, isRecommended, profile, onOrder }) {
     <div style={{
       border: `${isRecommended ? 2 : 1}px solid ${isRecommended ? colors.spice : colors.border}`,
       borderRadius: 14,
-      padding: 18,
+      padding: isAddon ? 14 : 18,
       position: 'relative',
-      background: isRecommended ? 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)' : '#fff',
+      background: isRecommended
+        ? 'linear-gradient(135deg, #FFFFFF 0%, #F7EBE6 100%)'
+        : isAddon
+          ? colors.bg
+          : '#fff',
     }}>
       {isRecommended && (
         <span style={{

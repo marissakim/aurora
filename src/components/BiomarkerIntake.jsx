@@ -116,12 +116,13 @@ export default function BiomarkerIntake({ profile, onComplete, onGetTested, onKi
           marginBottom: 24,
         }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: colors.spice, textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 8px' }}>
-            Three at-home Eve Kits
+            Four at-home Eve Kits
           </p>
           <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontSize: 14, color: colors.text, lineHeight: 1.7 }}>
-            <li><strong>Reproductive Health</strong> — the standard fertility baseline ($149)</li>
-            <li><strong>PCOS Health</strong> — for irregular cycles or suspected PCOS ($179)</li>
-            <li><strong>Metabolic Health</strong> — insulin, thyroid, and lipids ($169)</li>
+            <li><strong>Basic Fertility</strong> — TSH, LH/FSH, AMH ($199)</li>
+            <li><strong>Full Fertility</strong> — 11 markers including cortisol, DHEA, full thyroid ($299)</li>
+            <li><strong>Inflammation</strong> — hs-CRP + Vitamin D, for everyone ($99)</li>
+            <li><strong>Thyroid</strong> — focused TSH/T3/T4/TPO panel ($99)</li>
           </ul>
           <p style={{ fontSize: 12, color: colors.textLight, margin: 0, lineHeight: 1.5 }}>
             HSA / FSA eligible · Free shipping · CLIA-certified lab
