@@ -351,10 +351,14 @@ async function appendUserOrder(kv, userId, orderId) {
   await kv.put(key, JSON.stringify(list.slice(0, 50)));
 }
 
-// ─── Email Marissa via MailChannels ────────────────────────────────
-// MailChannels is free for Cloudflare Workers; uses our domain's SPF
-// record to send. For v0.1 we send to ADMIN_NOTIFY_EMAIL — set via
-// `wrangler secret put ADMIN_NOTIFY_EMAIL`.
+// ─── Email Marissa via Resend ──────────────────────────────────────
+// Was MailChannels but Cloudflare's free integration ended mid-2024.
+// Resend has a free tier (100/day, 3000/month) and lets us send from
+// onboarding@resend.dev without verifying a domain — fine for v0.1.
+//
+// Set: `wrangler secret put RESEND_API_KEY` (re_xxx from resend.com).
+// Pre-TestFlight: verify the eve.fertility domain so emails come from
+// our brand instead of resend.dev.
 
 async function emailMarissaPaidOrder(env, order) {
   const to = env.ADMIN_NOTIFY_EMAIL;
@@ -362,6 +366,11 @@ async function emailMarissaPaidOrder(env, order) {
     console.warn('ADMIN_NOTIFY_EMAIL not configured — skipping email');
     return;
   }
+  if (!env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not configured — skipping email');
+    return;
+  }
+
   const dollars = (order.amountCents / 100).toFixed(2);
   const ship = order.shipping?.address || {};
   const subject = `New paid Eve Kit order: ${order.kit.name || order.kit.id} ($${dollars})`;
@@ -390,16 +399,25 @@ Place this order with mylabkit.com, then mark as 'placed_with_mylabkit' via:
     -d '{"status":"placed_with_mylabkit"}'
 `;
 
-  await fetch('https://api.mailchannels.net/tx/v1/send', {
+  const fromAddress = env.FROM_EMAIL || 'Eve Orders <onboarding@resend.dev>';
+
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+    },
     body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: env.FROM_EMAIL || 'orders@eve.fertility', name: 'Eve Orders' },
+      from: fromAddress,
+      to: [to],
       subject,
-      content: [{ type: 'text/plain', value: text }],
+      text,
     }),
   });
+  if (!res.ok) {
+    const err = await res.text().catch(() => '(no body)');
+    console.error('Resend email failed:', res.status, err.slice(0, 200));
+  }
 }
 
 // ─── JSON helper ───────────────────────────────────────────────────
