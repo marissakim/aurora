@@ -1,15 +1,15 @@
 // Eve AI Worker — single endpoint that grew into a small router.
 //
 // Routes (v0.1):
-//   POST /            → Claude proxy (default; backward-compat with web).
-//   POST /insights    → Same as /. Explicit name preferred for new callers.
-//   POST /auth/apple  → Apple identity-token verification + session mint.
+//   POST /                       → Claude proxy (backward-compat).
+//   POST /insights                → Same. Explicit name for new callers.
+//   POST /auth/apple              → Apple identity-token → session token.
+//   POST /create-payment-intent   → Stripe PaymentIntent for kit checkout.
+//   POST /stripe-webhook          → Stripe → us, marks order paid.
+//   GET  /order/:id               → App polls for order status.
+//   POST /admin/order/:id/status  → Marissa flips status (shared secret).
 //
 // Routes (v0.2 will add):
-//   POST /create-payment-intent
-//   POST /stripe-webhook
-//   GET  /order/:id
-//   POST /admin/order/:id/status
 //   POST /webhook/mylabkit
 //
 // Front-end on failure falls back to a deterministic mock — the worker
@@ -18,6 +18,12 @@
 import { SYSTEM_PROMPT, ANALYSIS_TOOL } from './prompts.js';
 import { checkAndIncrementRateLimit } from './rateLimit.js';
 import { verifyAppleIdentityToken } from './jwt.js';
+import {
+  handleCreatePaymentIntent,
+  handleStripeWebhook,
+  handleGetOrder,
+  handleAdminUpdateOrderStatus,
+} from './orders.js';
 
 const CLAUDE_MODEL = 'claude-sonnet-4-5';
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
@@ -33,13 +39,33 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
+
+    // GET routes (read-only — currently just /order/:id)
+    if (request.method === 'GET') {
+      const orderMatch = url.pathname.match(/^\/order\/([^/]+)$/);
+      if (orderMatch) {
+        return handleGetOrder(request, env, corsHeaders, orderMatch[1]);
+      }
+      return json({ error: 'Not found' }, 404, corsHeaders);
+    }
+
     if (request.method !== 'POST') {
       return json({ error: 'Method not allowed' }, 405, corsHeaders);
     }
 
-    // Path-based routing
+    // POST routes — exact-match first, then patterns.
     if (url.pathname === '/auth/apple') {
       return handleAuthApple(request, env, corsHeaders);
+    }
+    if (url.pathname === '/create-payment-intent') {
+      return handleCreatePaymentIntent(request, env, corsHeaders);
+    }
+    if (url.pathname === '/stripe-webhook') {
+      return handleStripeWebhook(request, env, ctx);
+    }
+    const adminMatch = url.pathname.match(/^\/admin\/order\/([^/]+)\/status$/);
+    if (adminMatch) {
+      return handleAdminUpdateOrderStatus(request, env, corsHeaders, adminMatch[1]);
     }
 
     // Default + /insights = the existing Claude analysis flow
