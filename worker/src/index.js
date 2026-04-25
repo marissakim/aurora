@@ -1,37 +1,34 @@
-// Eve AI Worker — proxies dashboard requests to Claude.
-// Flow per request:
-//   1. CORS preflight
-//   2. Rate-limit by IP (50/day via KV)
-//   3. Response cache lookup (24h, keyed by SHA-256 of payload)
-//   4. Call Claude with tool use + prompt caching
-//   5. Extract tool_use block, validate, cache response, return JSON
+// Eve AI Worker — single endpoint that grew into a small router.
+//
+// Routes (v0.1):
+//   POST /            → Claude proxy (default; backward-compat with web).
+//   POST /insights    → Same as /. Explicit name preferred for new callers.
+//   POST /auth/apple  → Apple identity-token verification + session mint.
+//
+// Routes (v0.2 will add):
+//   POST /create-payment-intent
+//   POST /stripe-webhook
+//   GET  /order/:id
+//   POST /admin/order/:id/status
+//   POST /webhook/mylabkit
 //
 // Front-end on failure falls back to a deterministic mock — the worker
-// returning 5xx is not fatal, just graceful degradation.
+// returning 5xx is graceful degradation, not fatal.
 
 import { SYSTEM_PROMPT, ANALYSIS_TOOL } from './prompts.js';
 import { checkAndIncrementRateLimit } from './rateLimit.js';
+import { verifyAppleIdentityToken } from './jwt.js';
 
 const CLAUDE_MODEL = 'claude-sonnet-4-5';
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
 const REQUEST_TIMEOUT_MS = 45_000;
+const SESSION_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
+const APPLE_AUDIENCE = 'com.eve.fertility'; // our app's bundle ID
 
 export default {
   async fetch(request, env, ctx) {
-    const origin = request.headers.get('Origin') || '';
-    const allowedOrigin = env.ALLOWED_ORIGIN || '*';
-    // Allow both the production origin and localhost for dev
-    const corsOrigin =
-      origin === allowedOrigin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')
-        ? origin
-        : allowedOrigin;
-
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': corsOrigin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
-    };
+    const url = new URL(request.url);
+    const corsHeaders = makeCorsHeaders(request, env);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
@@ -40,61 +37,141 @@ export default {
       return json({ error: 'Method not allowed' }, 405, corsHeaders);
     }
 
-    // Rate limit by IP
-    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-    const rl = await checkAndIncrementRateLimit(env.CACHE, ip);
-    if (!rl.allowed) {
-      return json({ error: 'Daily rate limit reached', limit: rl.limit }, 429, corsHeaders);
+    // Path-based routing
+    if (url.pathname === '/auth/apple') {
+      return handleAuthApple(request, env, corsHeaders);
     }
 
-    // Parse and validate input
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return json({ error: 'Invalid JSON' }, 400, corsHeaders);
-    }
-    const { profile, biomarkers } = body || {};
-    if (!profile || typeof profile !== 'object') {
-      return json({ error: 'Missing profile' }, 400, corsHeaders);
+    // Default + /insights = the existing Claude analysis flow
+    if (url.pathname === '/' || url.pathname === '/insights') {
+      return handleInsights(request, env, ctx, corsHeaders);
     }
 
-    // Cache lookup — deterministic key from canonicalized inputs.
-    // Prefix 'resp:v2:' to invalidate v1 entries (which had a hashing bug
-    // that caused all profiles to hash identically).
-    const cacheKey = 'resp:v2:' + (await hashPayload({ profile, biomarkers: biomarkers || [] }));
-    try {
-      const cached = await env.CACHE.get(cacheKey);
-      if (cached) {
-        return json(JSON.parse(cached), 200, { ...corsHeaders, 'X-Eve-Cache': 'hit' });
-      }
-    } catch { /* ignore cache errors */ }
-
-    // Call Claude
-    let analysis;
-    try {
-      analysis = await callClaude(env.ANTHROPIC_API_KEY, profile, biomarkers || []);
-    } catch (err) {
-      console.error('Claude call failed:', err.message);
-      return json({ error: 'Upstream error', detail: err.message }, 502, corsHeaders);
-    }
-
-    // Cache successful response (fire-and-forget; don't block the response)
-    ctx.waitUntil(
-      env.CACHE.put(cacheKey, JSON.stringify(analysis), {
-        expirationTtl: CACHE_TTL_SECONDS,
-      }).catch(() => { /* ignore */ })
-    );
-
-    return json(analysis, 200, {
-      ...corsHeaders,
-      'X-Eve-Cache': 'miss',
-      'X-Eve-Remaining': String(rl.remaining),
-    });
+    return json({ error: 'Not found' }, 404, corsHeaders);
   },
 };
 
-// ─── Claude API call ────────────────────────────────────────────────
+// ─── /auth/apple — verify Apple JWT, mint our session token ─────────
+
+async function handleAuthApple(request, env, corsHeaders) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400, corsHeaders);
+  }
+  const { identityToken, email, fullName } = body || {};
+  if (!identityToken || typeof identityToken !== 'string') {
+    return json({ error: 'Missing identityToken' }, 400, corsHeaders);
+  }
+
+  let payload;
+  try {
+    payload = await verifyAppleIdentityToken(identityToken, APPLE_AUDIENCE, env.CACHE);
+  } catch (err) {
+    console.error('Apple JWT verification failed:', err.message);
+    return json({ error: 'Invalid identity token', detail: err.message }, 401, corsHeaders);
+  }
+
+  const userId = payload.sub;
+  // Apple only includes email on the FIRST sign-in for a given user. The
+  // client is allowed to pass it back to us in subsequent calls so we
+  // can persist it (we only trust the JWT version on first sign-in).
+  const verifiedEmail = payload.email || null;
+
+  // Upsert user record in KV. Email + fullName from the client are only
+  // stored if we don't already have them — protects against client lies.
+  const userKey = `user:${userId}`;
+  let user;
+  try {
+    const existing = await env.CACHE.get(userKey);
+    user = existing ? JSON.parse(existing) : null;
+  } catch {
+    user = null;
+  }
+  if (!user) {
+    user = {
+      id: userId,
+      email: verifiedEmail || email || null,
+      fullName: fullName || null,
+      createdAt: Date.now(),
+    };
+  } else if (!user.email && verifiedEmail) {
+    // Pick up the email if we didn't have it before but Apple just returned it
+    user.email = verifiedEmail;
+  }
+  await env.CACHE.put(userKey, JSON.stringify(user));
+
+  // Mint a fresh opaque session token. 90-day TTL.
+  const sessionToken = crypto.randomUUID().replace(/-/g, '');
+  const expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
+  await env.CACHE.put(
+    `session:${sessionToken}`,
+    JSON.stringify({ userId, expiresAt }),
+    { expirationTtl: SESSION_TTL_SECONDS },
+  );
+
+  return json({
+    userId,
+    email: user.email,
+    fullName: user.fullName,
+    sessionToken,
+    expiresAt,
+  }, 200, corsHeaders);
+}
+
+// ─── /insights — the existing Claude proxy, factored out ────────────
+
+async function handleInsights(request, env, ctx, corsHeaders) {
+  // Rate limit by IP
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rl = await checkAndIncrementRateLimit(env.CACHE, ip);
+  if (!rl.allowed) {
+    return json({ error: 'Daily rate limit reached', limit: rl.limit }, 429, corsHeaders);
+  }
+
+  // Parse and validate input
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400, corsHeaders);
+  }
+  const { profile, biomarkers } = body || {};
+  if (!profile || typeof profile !== 'object') {
+    return json({ error: 'Missing profile' }, 400, corsHeaders);
+  }
+
+  const cacheKey = 'resp:v2:' + (await hashPayload({ profile, biomarkers: biomarkers || [] }));
+  try {
+    const cached = await env.CACHE.get(cacheKey);
+    if (cached) {
+      return json(JSON.parse(cached), 200, { ...corsHeaders, 'X-Eve-Cache': 'hit' });
+    }
+  } catch { /* ignore cache errors */ }
+
+  let analysis;
+  try {
+    analysis = await callClaude(env.ANTHROPIC_API_KEY, profile, biomarkers || []);
+  } catch (err) {
+    console.error('Claude call failed:', err.message);
+    return json({ error: 'Upstream error', detail: err.message }, 502, corsHeaders);
+  }
+
+  ctx.waitUntil(
+    env.CACHE.put(cacheKey, JSON.stringify(analysis), {
+      expirationTtl: CACHE_TTL_SECONDS,
+    }).catch(() => { /* ignore */ }),
+  );
+
+  return json(analysis, 200, {
+    ...corsHeaders,
+    'X-Eve-Cache': 'miss',
+    'X-Eve-Remaining': String(rl.remaining),
+  });
+}
+
+// ─── Claude API call (unchanged from before refactor) ───────────────
 
 async function callClaude(apiKey, profile, biomarkers) {
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
@@ -110,14 +187,11 @@ Biomarkers: ${biomarkers.length === 0
     ? '(none added yet)'
     : JSON.stringify(biomarkers, null, 2)}`;
 
-  // Caching disabled for initial testing — can re-enable once calls succeed.
-  const request = {
+  const reqBody = {
     model: CLAUDE_MODEL,
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
-    messages: [
-      { role: 'user', content: userMessage },
-    ],
+    messages: [{ role: 'user', content: userMessage }],
     tools: [ANALYSIS_TOOL],
     tool_choice: { type: 'tool', name: 'aurora_analysis' },
   };
@@ -125,7 +199,6 @@ Biomarkers: ${biomarkers.length === 0
   let response;
   const startedAt = Date.now();
   try {
-    console.log('Claude call starting, model:', CLAUDE_MODEL, 'key-prefix:', apiKey.slice(0, 14));
     response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -133,13 +206,11 @@ Biomarkers: ${biomarkers.length === 0
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify(reqBody),
       signal: controller.signal,
     });
-    console.log('Claude responded in', Date.now() - startedAt, 'ms, status:', response.status);
   } catch (err) {
     clearTimeout(timeout);
-    console.error('Claude fetch error:', err.name, err.message, 'after', Date.now() - startedAt, 'ms');
     if (err.name === 'AbortError') throw new Error('Claude call timed out');
     throw err;
   }
@@ -147,43 +218,49 @@ Biomarkers: ${biomarkers.length === 0
 
   if (!response.ok) {
     const errText = await response.text().catch(() => '(no body)');
-    console.error('Claude error response:', response.status, errText.slice(0, 500));
     throw new Error(`Claude ${response.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = await response.json();
-  // Find the tool_use block — Claude may include thinking blocks first
   const toolUse = (data.content || []).find(c => c.type === 'tool_use');
-  if (!toolUse || !toolUse.input) {
-    throw new Error('Claude response missing tool_use block');
-  }
+  if (!toolUse || !toolUse.input) throw new Error('Claude response missing tool_use block');
 
-  // Basic shape validation — ensures we return what the frontend expects
   const { summary, insights, pathwayReasoning } = toolUse.input;
   if (typeof summary !== 'string' || !Array.isArray(insights) || !pathwayReasoning) {
     throw new Error('Claude response has invalid shape');
   }
-
   return { summary, insights, pathwayReasoning, _source: 'claude' };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
+function makeCorsHeaders(request, env) {
+  const origin = request.headers.get('Origin') || '';
+  const allowedOrigin = env.ALLOWED_ORIGIN || '*';
+  // Allow web prototype origin, localhost dev, and any origin when called
+  // from the iOS app (RN fetches don't send a recognizable Origin header).
+  const corsOrigin =
+    origin === allowedOrigin
+    || origin.startsWith('http://localhost')
+    || origin.startsWith('http://127.0.0.1')
+    || origin === ''
+      ? origin || '*'
+      : allowedOrigin;
+  return {
+    'Access-Control-Allow-Origin': corsOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
 function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...extraHeaders,
-    },
+    headers: { 'Content-Type': 'application/json', ...extraHeaders },
   });
 }
 
-/**
- * Recursively sort object keys so two profiles with the same content but
- * different key insertion order hash identically. Arrays preserve order
- * (since order is meaningful for biomarkers).
- */
 function deepCanonicalize(value) {
   if (value === null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(deepCanonicalize);
@@ -193,16 +270,6 @@ function deepCanonicalize(value) {
   return out;
 }
 
-/**
- * Stable SHA-256 hash of a canonicalized payload, used as the cache key.
- *
- * Earlier version used JSON.stringify(obj, Object.keys(obj).sort()) — but
- * the second arg there is a property *filter* (only top-level keys passed
- * through), so all nested keys (age, goal, etc.) were dropped. That caused
- * every distinct profile to hash to the same key and serve a single cached
- * response to all users. Bumping the prefix ('resp:v2:') abandons any
- * poisoned entries from the broken version.
- */
 async function hashPayload(obj) {
   const canonical = JSON.stringify(deepCanonicalize(obj));
   const encoder = new TextEncoder();
