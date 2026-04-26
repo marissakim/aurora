@@ -63,19 +63,29 @@ export async function handleCreatePaymentIntent(request, env, corsHeaders) {
 
   const orderId = `ord_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
 
-  // Create the Stripe PaymentIntent.
+  // Create the Stripe PaymentIntent. Pass shipping into Stripe's built-in
+  // shipping field so the full address shows in the Dashboard payment page
+  // — important for manual fulfillment via mylabkit until the v0.2 API
+  // integration lands. Customer name/phone/email also get attached.
   let intent;
   try {
     intent = await createStripePaymentIntent(env.STRIPE_SECRET_KEY, {
       amount: totalCents,
       currency: 'usd',
       receiptEmail: customer.email,
+      shipping: {
+        name: customer.name,
+        phone: customer.phone,
+        address: shipping.address || null,
+      },
       metadata: {
         orderId,
         kitId: kit.id,
         kitName: kit.name || kit.id,
         userId: userId || 'anonymous',
-        shippingId: shipping.id,
+        shippingMethod: shipping.label || shipping.id,
+        customerName: customer.name || '',
+        customerPhone: customer.phone || '',
       },
     });
   } catch (err) {
@@ -160,13 +170,20 @@ export async function handleStripeWebhook(request, env, ctx) {
   }
   const order = JSON.parse(existing);
 
+  console.log('[webhook] event:', event.type, 'order:', orderId);
+
   if (event.type === 'payment_intent.succeeded') {
     order.status = 'paid';
     order.paidAt = Date.now();
     order.statusHistory.push({ status: 'paid', at: Date.now() });
     await env.CACHE.put(orderKey, JSON.stringify(order));
-    // Email Marissa fire-and-forget so the webhook still returns 200 fast.
-    ctx.waitUntil(emailMarissaPaidOrder(env, order).catch(() => {}));
+    // Email Marissa synchronously so any errors land in tail logs.
+    // (Was ctx.waitUntil but its logs don't show in pretty tail mode.)
+    try {
+      await emailMarissaPaidOrder(env, order);
+    } catch (err) {
+      console.error('[email] Threw:', err?.message || err);
+    }
   } else if (event.type === 'payment_intent.payment_failed') {
     order.status = 'failed';
     order.statusHistory.push({
@@ -247,12 +264,28 @@ export async function handleAdminUpdateOrderStatus(request, env, corsHeaders, or
 
 // ─── Stripe REST helpers ───────────────────────────────────────────
 
-async function createStripePaymentIntent(secretKey, { amount, currency, receiptEmail, metadata }) {
+async function createStripePaymentIntent(secretKey, { amount, currency, receiptEmail, shipping, metadata }) {
   const params = new URLSearchParams();
   params.set('amount', String(amount));
   params.set('currency', currency);
   params.set('automatic_payment_methods[enabled]', 'true');
   if (receiptEmail) params.set('receipt_email', receiptEmail);
+
+  // Stripe's built-in shipping field — surfaces in Dashboard's payment
+  // detail page as a "Shipping address" section, which is what's useful
+  // for manual fulfillment via mylabkit.
+  if (shipping?.name && shipping?.address) {
+    const a = shipping.address;
+    params.set('shipping[name]', shipping.name);
+    if (shipping.phone) params.set('shipping[phone]', shipping.phone);
+    if (a.line1) params.set('shipping[address][line1]', a.line1);
+    if (a.line2) params.set('shipping[address][line2]', a.line2);
+    if (a.city) params.set('shipping[address][city]', a.city);
+    if (a.state) params.set('shipping[address][state]', a.state);
+    if (a.zip) params.set('shipping[address][postal_code]', a.zip);
+    params.set('shipping[address][country]', a.country || 'US');
+  }
+
   for (const [k, v] of Object.entries(metadata || {})) {
     params.set(`metadata[${k}]`, String(v));
   }
@@ -361,15 +394,17 @@ async function appendUserOrder(kv, userId, orderId) {
 // our brand instead of resend.dev.
 
 async function emailMarissaPaidOrder(env, order) {
+  console.log('[email] Send attempt for order', order.id);
   const to = env.ADMIN_NOTIFY_EMAIL;
   if (!to) {
-    console.warn('ADMIN_NOTIFY_EMAIL not configured — skipping email');
+    console.warn('[email] ADMIN_NOTIFY_EMAIL not configured — skipping');
     return;
   }
   if (!env.RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY not configured — skipping email');
+    console.warn('[email] RESEND_API_KEY not configured — skipping');
     return;
   }
+  console.log('[email] Sending to', to, 'via Resend');
 
   const dollars = (order.amountCents / 100).toFixed(2);
   const ship = order.shipping?.address || {};
@@ -416,7 +451,10 @@ Place this order with mylabkit.com, then mark as 'placed_with_mylabkit' via:
   });
   if (!res.ok) {
     const err = await res.text().catch(() => '(no body)');
-    console.error('Resend email failed:', res.status, err.slice(0, 200));
+    console.error('[email] Resend rejected:', res.status, err.slice(0, 300));
+  } else {
+    const ok = await res.json().catch(() => null);
+    console.log('[email] Resend accepted, id:', ok?.id);
   }
 }
 

@@ -24,6 +24,7 @@ import {
   handleGetOrder,
   handleAdminUpdateOrderStatus,
 } from './orders.js';
+import { handleAdminPage } from './admin.js';
 
 const CLAUDE_MODEL = 'claude-sonnet-4-5';
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
@@ -40,8 +41,11 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // GET routes (read-only — currently just /order/:id)
+    // GET routes (read-only — currently /order/:id and the admin page)
     if (request.method === 'GET') {
+      if (url.pathname === '/admin' || url.pathname === '/admin/') {
+        return handleAdminPage(request, env);
+      }
       const orderMatch = url.pathname.match(/^\/order\/([^/]+)$/);
       if (orderMatch) {
         return handleGetOrder(request, env, corsHeaders, orderMatch[1]);
