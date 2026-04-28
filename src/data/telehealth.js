@@ -22,16 +22,6 @@ export const telehealthProviders = [
     icon: '🧪',
   },
   {
-    name: 'Alife Health',
-    url: 'https://alife.health',
-    tagline: 'AI-powered treatment optimization',
-    description: 'Data-driven second opinions and protocol optimization for people already in treatment or considering IVF. Partners with physical clinics.',
-    offerings: ['Second opinions', 'IVF cycle analysis', 'Protocol coaching'],
-    costRange: 'Often covered by partner clinics',
-    idealFor: 'Optimizing an existing treatment plan, considering IVF',
-    icon: '🤖',
-  },
-  {
     name: 'Maven Clinic',
     url: 'https://mavenclinic.com',
     tagline: 'Women\'s health platform with fertility track',
