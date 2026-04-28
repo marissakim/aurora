@@ -394,7 +394,6 @@ async function appendUserOrder(kv, userId, orderId) {
 // our brand instead of resend.dev.
 
 async function emailMarissaPaidOrder(env, order) {
-  console.log('[email] Send attempt for order', order.id);
   const to = env.ADMIN_NOTIFY_EMAIL;
   if (!to) {
     console.warn('[email] ADMIN_NOTIFY_EMAIL not configured — skipping');
@@ -404,7 +403,6 @@ async function emailMarissaPaidOrder(env, order) {
     console.warn('[email] RESEND_API_KEY not configured — skipping');
     return;
   }
-  console.log('[email] Sending to', to, 'via Resend');
 
   const dollars = (order.amountCents / 100).toFixed(2);
   const ship = order.shipping?.address || {};
@@ -452,9 +450,6 @@ Place this order with mylabkit.com, then mark as 'placed_with_mylabkit' via:
   if (!res.ok) {
     const err = await res.text().catch(() => '(no body)');
     console.error('[email] Resend rejected:', res.status, err.slice(0, 300));
-  } else {
-    const ok = await res.json().catch(() => null);
-    console.log('[email] Resend accepted, id:', ok?.id);
   }
 }
 
