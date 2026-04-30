@@ -327,7 +327,12 @@ function renderTelehealthPage(requests, key) {
 
   const rows = requests
     .map(r => {
-      const slotsHtml = (r.slots || [])
+      // slotsDisplay is the PT-formatted version from the app; falls
+      // back to raw slots if older record.
+      const slotsToShow = (r.slotsDisplay && r.slotsDisplay.length)
+        ? r.slotsDisplay
+        : (r.slots || []);
+      const slotsHtml = slotsToShow
         .map(s => `<div class="slot">${esc(s)}</div>`)
         .join("");
       const statusOptions = TELEHEALTH_STATUSES.map(
@@ -341,6 +346,7 @@ function renderTelehealthPage(requests, key) {
     <div class="dim">${fmtDate(r.createdAt)}</div>
   </td>
   <td>
+    <div><strong>${esc(r.name) || "—"}</strong></div>
     <div><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></div>
     ${r.userId ? `<div class="dim mono">${esc(r.userId)}</div>` : ""}
   </td>
@@ -372,6 +378,8 @@ function renderTelehealthPage(requests, key) {
     requests.length === 0
       ? `<tr><td colspan="5" class="empty">No telehealth requests yet. They will appear here as users submit Eve Care requests.</td></tr>`
       : "";
+
+  // Header column "From" now shows name + email; column count unchanged.
 
   return `<!doctype html>
 <html><head>

@@ -27,12 +27,15 @@ export async function handleTelehealthRequest(request, env, corsHeaders) {
     return json({ error: 'Invalid JSON' }, 400, corsHeaders);
   }
 
-  const { email, slots, notes } = body || {};
+  const { name, email, slots, slotsDisplay, notes } = body || {};
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return json({ error: 'Name required' }, 400, corsHeaders);
+  }
   if (!email || typeof email !== 'string') {
     return json({ error: 'Email required' }, 400, corsHeaders);
   }
-  if (!Array.isArray(slots) || slots.filter(s => typeof s === 'string' && s.trim()).length < 2) {
-    return json({ error: 'At least two preferred times required' }, 400, corsHeaders);
+  if (!Array.isArray(slots) || slots.filter(s => typeof s === 'string' && s.trim()).length < 3) {
+    return json({ error: 'Three preferred times required' }, 400, corsHeaders);
   }
 
   // Tie request to user if signed in (most cases). Anonymous requests OK.
@@ -44,8 +47,15 @@ export async function handleTelehealthRequest(request, env, corsHeaders) {
     createdAt: Date.now(),
     status: 'pending',
     userId: userId || null,
+    name: name.trim(),
     email: email.trim(),
+    // ISO-string UTC timestamps; admin formats them in PT for display.
     slots: slots.map(s => String(s).trim()).filter(Boolean),
+    // Pre-formatted PT strings from the app (e.g., "Mon Apr 28, 2:00 PM PT").
+    // Saves us from re-formatting in the admin / email.
+    slotsDisplay: Array.isArray(slotsDisplay)
+      ? slotsDisplay.map(s => String(s).trim()).filter(Boolean)
+      : [],
     notes: notes ? String(notes).trim().slice(0, 1000) : null,
     statusHistory: [{ status: 'pending', at: Date.now() }],
   };
@@ -140,14 +150,19 @@ async function emailMarissaTelehealthRequest(env, record) {
   const to = env.ADMIN_NOTIFY_EMAIL;
   if (!to || !env.RESEND_API_KEY) return;
 
-  const slotsText = record.slots
+  // Prefer pre-formatted PT display strings; fall back to raw ISO if missing.
+  const slotsForEmail = record.slotsDisplay?.length
+    ? record.slotsDisplay
+    : record.slots;
+  const slotsText = slotsForEmail
     .map((s, i) => `  ${i + 1}. ${s}`)
     .join('\n');
-  const subject = `New Eve Care request: ${record.email}`;
+  const subject = `New Eve Care request: ${record.name}`;
   const text = `New telehealth consult request:
 
 Request ID: ${record.id}
-From: ${record.email}
+Name: ${record.name}
+Email: ${record.email}
 User ID: ${record.userId || '(anonymous)'}
 
 Preferred times:
