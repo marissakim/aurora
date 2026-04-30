@@ -1,16 +1,14 @@
-// Admin order console.
+// Admin console — orders + telehealth requests.
 //
-// Single self-contained HTML page served at /admin. Auth: the
-// ADMIN_SHARED_SECRET goes in the URL as ?key=… (or as a cookie set
-// after first sign-in). Same secret as the existing admin/order/:id/
-// status mutation endpoint.
-//
-// Lists all orders newest-first, shows full shipping address +
-// customer details + Stripe link, and lets you flip status from a
-// dropdown (no curl required). Plus a "List all" view since v0.1
-// volume is tiny.
+// Two pages, both served from this file, both gated by the same
+// ADMIN_SHARED_SECRET that mutates work via /admin/order/:id/status
+// and /admin/telehealth/:id/status. After first sign-in the secret
+// lives in an httpOnly cookie so navigation between /admin and
+// /admin/telehealth doesn't require re-entering it.
 //
 // All UI is HTML + a sprinkle of vanilla JS — no build step, no deps.
+
+import { listAllTelehealthRequests } from './telehealth.js';
 
 const ALL_STATUSES = [
   'pending',
@@ -23,8 +21,15 @@ const ALL_STATUSES = [
   'refunded',
 ];
 
+const TELEHEALTH_STATUSES = [
+  'pending',
+  'scheduled',
+  'completed',
+  'cancelled',
+  'no-show',
+];
+
 export async function handleAdminPage(request, env) {
-  // Auth gate — match the secret used for /admin/order/:id/status mutations.
   const url = new URL(request.url);
   const providedKey = url.searchParams.get('key') || readCookie(request, 'eve_admin');
   if (!env.ADMIN_SHARED_SECRET || providedKey !== env.ADMIN_SHARED_SECRET) {
@@ -33,7 +38,24 @@ export async function handleAdminPage(request, env) {
 
   const orders = await listAllOrders(env.CACHE);
   const html = renderAdminPage(orders, providedKey);
-  // Set the cookie so they don't have to keep ?key=… in the URL.
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Set-Cookie': `eve_admin=${providedKey}; Path=/; HttpOnly; SameSite=Strict; Max-Age=2592000`,
+    },
+  });
+}
+
+export async function handleAdminTelehealthPage(request, env) {
+  const url = new URL(request.url);
+  const providedKey = url.searchParams.get('key') || readCookie(request, 'eve_admin');
+  if (!env.ADMIN_SHARED_SECRET || providedKey !== env.ADMIN_SHARED_SECRET) {
+    return signinPage();
+  }
+
+  const requests = await listAllTelehealthRequests(env.CACHE);
+  const html = renderTelehealthPage(requests, providedKey);
   return new Response(html, {
     status: 200,
     headers: {
@@ -66,6 +88,43 @@ function readCookie(request, name) {
   const cookie = request.headers.get('Cookie') || '';
   const match = cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
   return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Shared styles + tab nav reused between orders and telehealth pages.
+
+const ADMIN_STYLES = `<style>
+  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; background: #EDEAE0; color: #2B2B2B; margin: 0; padding: 24px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; max-width: 1400px; margin-left: auto; margin-right: auto; gap: 16px; flex-wrap: wrap; }
+  .subheader { max-width: 1400px; margin: 0 auto 20px; color: #7A7574; font-size: 13px; }
+  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; color: #3D2E3D; margin: 0; }
+  .tabs { display: flex; gap: 4px; }
+  .tabs a { font: 600 13px/1 -apple-system, sans-serif; color: #7A7574; padding: 8px 14px; border-radius: 999px; text-decoration: none; transition: background .15s; }
+  .tabs a:hover { background: rgba(122,66,50,0.06); }
+  .tabs a.active { background: #3D2E3D; color: #FBF9F5; }
+  table { width: 100%; max-width: 1400px; margin: 0 auto; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #EDEAE0; vertical-align: top; }
+  th { font-size: 11px; font-weight: 700; color: #7A7574; text-transform: uppercase; letter-spacing: 0.6px; background: #FBF8F3; }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .dim { color: #7A7574; font-size: 12px; margin-top: 2px; }
+  .empty { text-align: center; padding: 60px; color: #7A7574; font-style: italic; }
+  a { color: #7A4232; text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+  select.status { padding: 6px 10px; border-radius: 6px; border: 1px solid #DDD8CC; background: #fff; font-size: 13px; cursor: pointer; }
+  .history-toggle { cursor: pointer; user-select: none; margin-top: 6px; font-size: 11px; }
+  .history { display: none; margin-top: 6px; }
+  .history.open { display: block; }
+  .slot { background: #FBF6F2; padding: 4px 8px; border-radius: 6px; margin-bottom: 4px; font-size: 13px; color: #2B2B2B; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #2E7D32; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
+  .toast.err { background: #C62828; }
+</style>`;
+
+function renderTabs(key, active) {
+  const k = encodeURIComponent(key);
+  const tab = (slug, label) =>
+    `<a href="/admin${slug ? '/' + slug : ''}?key=${k}"${active === slug || (active === 'orders' && !slug) ? ' class="active"' : ''}>${label}</a>`;
+  return `<nav class="tabs">${tab('', 'Orders')}${tab('telehealth', 'Telehealth')}</nav>`;
 }
 
 function signinPage() {
@@ -189,35 +248,15 @@ function renderAdminPage(orders, key) {
 <html><head>
 <meta charset="utf-8">
 <title>Eve Admin · Orders</title>
-<style>
-  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; background: #EDEAE0; color: #2B2B2B; margin: 0; padding: 24px; }
-  .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
-  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; color: #3D2E3D; margin: 0; }
-  .count { color: #7A7574; font-size: 13px; }
-  table { width: 100%; max-width: 1400px; margin: 0 auto; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-  th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #EDEAE0; vertical-align: top; }
-  th { font-size: 11px; font-weight: 700; color: #7A7574; text-transform: uppercase; letter-spacing: 0.6px; background: #FBF8F3; }
-  tr:last-child td { border-bottom: none; }
-  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
-  .dim { color: #7A7574; font-size: 12px; margin-top: 2px; }
-  .empty { text-align: center; padding: 60px; color: #7A7574; font-style: italic; }
-  a { color: #7A4232; text-decoration: none; font-weight: 600; }
-  a:hover { text-decoration: underline; }
-  select.status { padding: 6px 10px; border-radius: 6px; border: 1px solid #DDD8CC; background: #fff; font-size: 13px; cursor: pointer; }
-  .history-toggle { cursor: pointer; user-select: none; margin-top: 6px; font-size: 11px; }
-  .history { display: none; margin-top: 6px; }
-  .history.open { display: block; }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: #2E7D32; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .2s; }
-  .toast.show { opacity: 1; }
-  .toast.err { background: #C62828; }
-</style>
+${ADMIN_STYLES}
 </head>
 <body>
   <div class="header">
-    <h1>Eve · Orders</h1>
-    <span class="count">${orders.length} order${orders.length === 1 ? '' : 's'} · <a href="?key=${encodeURIComponent(
-      key,
-    )}">refresh</a></span>
+    <h1>Eve Admin</h1>
+    ${renderTabs(key, 'orders')}
+  </div>
+  <div class="subheader">
+    <span class="count">${orders.length} order${orders.length === 1 ? '' : 's'} · <a href="?key=${encodeURIComponent(key)}">refresh</a></span>
   </div>
   <table>
     <thead>
@@ -259,6 +298,134 @@ function renderAdminPage(orders, key) {
         } catch (err) {
           sel.value = original;
           showToast('Failed: ' + err.message, true);
+        }
+      });
+    });
+  </script>
+</body></html>`;
+}
+
+function renderTelehealthPage(requests, key) {
+  const fmtDate = ts =>
+    ts
+      ? new Date(ts).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : "—";
+  const esc = s =>
+    String(s ?? "").replace(/[<>&"']/g, c => ({
+      "<": "&lt;",
+      ">": "&gt;",
+      "&": "&amp;",
+      "\"": "&quot;",
+      "'": "&#39;",
+    }[c]));
+
+  const rows = requests
+    .map(r => {
+      const slotsHtml = (r.slots || [])
+        .map(s => `<div class="slot">${esc(s)}</div>`)
+        .join("");
+      const statusOptions = TELEHEALTH_STATUSES.map(
+        s =>
+          `<option value="${s}"${s === r.status ? " selected" : ""}>${s}</option>`,
+      ).join("");
+      return `
+<tr>
+  <td>
+    <div class="mono">${esc(r.id)}</div>
+    <div class="dim">${fmtDate(r.createdAt)}</div>
+  </td>
+  <td>
+    <div><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></div>
+    ${r.userId ? `<div class="dim mono">${esc(r.userId)}</div>` : ""}
+  </td>
+  <td>${slotsHtml || "—"}</td>
+  <td>
+    ${r.notes ? esc(r.notes) : "<span class=\"dim\">—</span>"}
+  </td>
+  <td>
+    <select class="status" data-id="${esc(r.id)}">
+      ${statusOptions}
+    </select>
+    <div class="dim history-toggle" onclick="this.nextElementSibling.classList.toggle('open')">history ▾</div>
+    <div class="history">
+      ${(r.statusHistory || [])
+        .map(
+          h =>
+            `<div class="dim">${esc(h.status)} · ${fmtDate(h.at)}${
+              h.note ? " · " + esc(h.note) : ""
+            }</div>`,
+        )
+        .join("")}
+    </div>
+  </td>
+</tr>`;
+    })
+    .join("");
+
+  const empty =
+    requests.length === 0
+      ? `<tr><td colspan="5" class="empty">No telehealth requests yet. They will appear here as users submit Eve Care requests.</td></tr>`
+      : "";
+
+  return `<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>Eve Admin · Telehealth</title>
+${ADMIN_STYLES}
+</head>
+<body>
+  <div class="header">
+    <h1>Eve Admin</h1>
+    ${renderTabs(key, "telehealth")}
+  </div>
+  <div class="subheader">
+    <span class="count">${requests.length} request${requests.length === 1 ? "" : "s"} · <a href="?key=${encodeURIComponent(key)}">refresh</a></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Request</th>
+        <th>From</th>
+        <th>Preferred times</th>
+        <th>Notes</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}${empty}
+    </tbody>
+  </table>
+  <div id="toast" class="toast"></div>
+  <script>
+    const key = ${JSON.stringify(key)};
+    const toast = document.getElementById("toast");
+    function showToast(msg, err) {
+      toast.textContent = msg;
+      toast.className = "toast show" + (err ? " err" : "");
+      setTimeout(() => { toast.className = "toast" + (err ? " err" : ""); }, 2400);
+    }
+    document.querySelectorAll("select.status").forEach(sel => {
+      const original = sel.value;
+      sel.addEventListener("change", async () => {
+        const id = sel.dataset.id;
+        const status = sel.value;
+        try {
+          const res = await fetch("/admin/telehealth/" + encodeURIComponent(id) + "/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Admin-Secret": key },
+            body: JSON.stringify({ status }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          showToast("Updated to " + status);
+        } catch (err) {
+          sel.value = original;
+          showToast("Failed: " + err.message, true);
         }
       });
     });

@@ -24,7 +24,11 @@ import {
   handleGetOrder,
   handleAdminUpdateOrderStatus,
 } from './orders.js';
-import { handleAdminPage } from './admin.js';
+import { handleAdminPage, handleAdminTelehealthPage } from './admin.js';
+import {
+  handleTelehealthRequest,
+  handleAdminUpdateTelehealthStatus,
+} from './telehealth.js';
 
 const CLAUDE_MODEL = 'claude-sonnet-4-5';
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
@@ -41,10 +45,13 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // GET routes (read-only — currently /order/:id and the admin page)
+    // GET routes (read-only — admin pages + /order/:id)
     if (request.method === 'GET') {
       if (url.pathname === '/admin' || url.pathname === '/admin/') {
         return handleAdminPage(request, env);
+      }
+      if (url.pathname === '/admin/telehealth' || url.pathname === '/admin/telehealth/') {
+        return handleAdminTelehealthPage(request, env);
       }
       const orderMatch = url.pathname.match(/^\/order\/([^/]+)$/);
       if (orderMatch) {
@@ -70,6 +77,13 @@ export default {
     const adminMatch = url.pathname.match(/^\/admin\/order\/([^/]+)\/status$/);
     if (adminMatch) {
       return handleAdminUpdateOrderStatus(request, env, corsHeaders, adminMatch[1]);
+    }
+    const tlhAdminMatch = url.pathname.match(/^\/admin\/telehealth\/([^/]+)\/status$/);
+    if (tlhAdminMatch) {
+      return handleAdminUpdateTelehealthStatus(request, env, corsHeaders, tlhAdminMatch[1]);
+    }
+    if (url.pathname === '/telehealth/request') {
+      return handleTelehealthRequest(request, env, corsHeaders);
     }
 
     // Default + /insights = the existing Claude analysis flow
