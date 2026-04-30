@@ -1,21 +1,21 @@
 // Telehealth providers shown on the Find Clinics → Virtual Care tab.
-// First entry is "Eve Care" — our complimentary consult that opens an
-// in-app request flow instead of an external website. v0.2 swaps the
-// manual calendar-invite flow for an integration with mylabbox.com's
-// scheduling API.
+// First entry is "Telehealth for Eve Kits" — our complimentary
+// kit-results-review consult that opens an in-app request flow instead
+// of an external website. v0.2 swaps the manual calendar-invite flow
+// for an integration with mylabbox.com's scheduling API.
 //
 // Other entries are real third-party providers; tapping them opens the
 // provider's site in the in-app browser.
 export const telehealthProviders = [
   {
-    id: 'eve-care',
+    id: 'eve-kit-telehealth',
     internal: true, // signals FindClinics to render the request modal
-    name: 'Eve Care',
-    tagline: 'Free 30-min consult with the Eve team',
-    description: 'Get help interpreting your biomarkers, walking through pathway options, or thinking through next steps with someone who knows your data. Share three times that work for you and we\'ll send a calendar invite.',
-    offerings: ['Plan review', 'Biomarker walkthrough', 'Pathway guidance', 'Q&A'],
-    costRange: 'Complimentary',
-    idealFor: 'Eve users who want a human to help interpret their data',
+    name: 'Telehealth for Eve Kits',
+    tagline: 'Free 30-min lab-results review',
+    description: 'After your at-home Eve Kit results come back, book a complimentary 30-minute video consult with the Eve team to walk through what your numbers mean and what to do next. Available to anyone who has ordered an Eve Kit.',
+    offerings: ['Lab result review'],
+    costRange: 'Free with any Eve Kit',
+    idealFor: 'Eve Kit customers who want help interpreting their lab results',
     icon: '🌿',
   },
   {
