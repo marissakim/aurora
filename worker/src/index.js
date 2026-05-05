@@ -68,6 +68,9 @@ export default {
     if (url.pathname === '/auth/apple') {
       return handleAuthApple(request, env, corsHeaders);
     }
+    if (url.pathname === '/auth/delete') {
+      return handleAuthDelete(request, env, corsHeaders);
+    }
     if (url.pathname === '/create-payment-intent') {
       return handleCreatePaymentIntent(request, env, corsHeaders);
     }
@@ -162,6 +165,82 @@ async function handleAuthApple(request, env, corsHeaders) {
     sessionToken,
     expiresAt,
   }, 200, corsHeaders);
+}
+
+// ─── /auth/delete — delete user account + associated data ───────────
+//
+// Required by Apple guideline 5.1.1(v): apps with account creation must
+// support in-app deletion. Authenticated via the existing session token.
+// Deletes:
+//   - The session token currently in use (so caller is signed out)
+//   - The user record (user:${userId})
+//   - The user's order index (user-orders:${userId})
+//
+// Notes:
+//   - Order records themselves (order:${orderId}) are KEPT for tax /
+//     accounting compliance per the privacy policy. We strip the userId
+//     from each so the order is no longer linked to a person — this is
+//     "anonymization" not "retention" from the user's perspective.
+//   - Stripe customer + payment records remain on Stripe per their
+//     retention policy; users can request deletion via Stripe's privacy
+//     controls separately.
+
+async function handleAuthDelete(request, env, corsHeaders) {
+  const auth = request.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401, corsHeaders);
+  }
+  const token = auth.slice(7);
+  if (!token) return json({ error: 'Unauthorized' }, 401, corsHeaders);
+
+  // Resolve session → userId.
+  let userId;
+  try {
+    const sessionRaw = await env.CACHE.get(`session:${token}`);
+    if (!sessionRaw) return json({ error: 'Unauthorized' }, 401, corsHeaders);
+    const session = JSON.parse(sessionRaw);
+    if (session.expiresAt && session.expiresAt < Date.now()) {
+      return json({ error: 'Session expired' }, 401, corsHeaders);
+    }
+    userId = session.userId;
+  } catch {
+    return json({ error: 'Unauthorized' }, 401, corsHeaders);
+  }
+
+  // Anonymize the user's orders (strip userId) but retain the records
+  // themselves for tax compliance. Best-effort — failure here doesn't
+  // block the rest of the deletion.
+  try {
+    const orderListRaw = await env.CACHE.get(`user-orders:${userId}`);
+    if (orderListRaw) {
+      const orderIds = JSON.parse(orderListRaw);
+      await Promise.all(
+        orderIds.map(async oid => {
+          try {
+            const raw = await env.CACHE.get(`order:${oid}`);
+            if (!raw) return;
+            const order = JSON.parse(raw);
+            order.userId = null;
+            order.userDeletedAt = Date.now();
+            await env.CACHE.put(`order:${oid}`, JSON.stringify(order));
+          } catch {
+            // Skip this order, continue.
+          }
+        }),
+      );
+    }
+  } catch {
+    // Anonymization failed; proceed with deletion anyway.
+  }
+
+  // Delete user record, order index, and the session in use.
+  await Promise.all([
+    env.CACHE.delete(`user:${userId}`),
+    env.CACHE.delete(`user-orders:${userId}`),
+    env.CACHE.delete(`session:${token}`),
+  ]);
+
+  return json({ ok: true, deletedUserId: userId }, 200, corsHeaders);
 }
 
 // ─── /insights — the existing Claude proxy, factored out ────────────
