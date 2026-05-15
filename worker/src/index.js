@@ -25,6 +25,7 @@ import {
   handleAdminUpdateOrderStatus,
 } from './orders.js';
 import { handleAdminPage, handleAdminTelehealthPage } from './admin.js';
+import { handleAdminWebOrdersPage } from './webOrders.js';
 import {
   handleTelehealthRequest,
   handleAdminUpdateTelehealthStatus,
@@ -52,6 +53,9 @@ export default {
       }
       if (url.pathname === '/admin/telehealth' || url.pathname === '/admin/telehealth/') {
         return handleAdminTelehealthPage(request, env);
+      }
+      if (url.pathname === '/admin/web-orders' || url.pathname === '/admin/web-orders/') {
+        return handleAdminWebOrdersPage(request, env);
       }
       const orderMatch = url.pathname.match(/^\/order\/([^/]+)$/);
       if (orderMatch) {

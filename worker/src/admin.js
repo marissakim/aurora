@@ -124,7 +124,7 @@ function renderTabs(key, active) {
   const k = encodeURIComponent(key);
   const tab = (slug, label) =>
     `<a href="/admin${slug ? '/' + slug : ''}?key=${k}"${active === slug || (active === 'orders' && !slug) ? ' class="active"' : ''}>${label}</a>`;
-  return `<nav class="tabs">${tab('', 'Orders')}${tab('telehealth', 'Telehealth')}</nav>`;
+  return `<nav class="tabs">${tab('', 'Orders')}${tab('telehealth', 'Telehealth')}${tab('web-orders', 'Web Orders')}</nav>`;
 }
 
 function signinPage() {
